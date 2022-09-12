@@ -1,0 +1,18 @@
+USE mavenfuzzyfactory; 
+
+DROP TABLE session_pageview;
+
+CREATE TEMPORARY TABLE session_pageview
+SELECT website_session_id,MIN(website_pageview_id) as pg_id FROM website_pageviews
+WHERE website_pageviews.created_at < '2012-06-12'
+GROUP BY website_session_id; 
+
+SELECT * FROM session_pageview;
+
+-- Now JOIN to find the landing pages : The pageview ID was created to be used to find the landing page. 
+
+SELECT website_pageviews.pageview_url as landing_page, COUNT(session_pageview.website_session_id) 
+FROM session_pageview LEFT JOIN website_pageviews
+ON website_pageviews.website_pageview_id = session_pageview.pg_id
+WHERE website_pageviews.created_at < '2012-06-12'
+GROUP BY website_pageviews.pageview_url;

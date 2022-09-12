@@ -1,0 +1,1007 @@
+-- 1) adjusting max packet size to allow large files to run
+
+SET GLOBAL max_allowed_packet = 1073741824;
+
+
+-- 2) adjusting your SQL mode to allow invalid dates and use a smarter GROUP BY setting
+
+SET GLOBAL SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES,ONLY_FULL_GROUP_BY';
+
+
+-- 3) adjusting your timeout settings to run longer queries
+
+SET GLOBAL connect_timeout=28800;
+
+SET GLOBAL wait_timeout=28800;
+
+SET GLOBAL interactive_timeout=28800;
+
+USE mavenfuzzyfactory;
+
+
+SELECT * FROM website_sessions;
+
+SELECT * FROm orders;
+
+SELECT utm_source,
+COUNT(DISTINCT website_sessions.website_session_id) as total_sessions,
+COUNT(DISTINCT orders.order_id) as total_orders,
+100*COUNT(DISTINCT orders.order_id)/COUNT(DISTINCT website_sessions.website_session_id) as conversion_rate
+FROM website_sessions LEFT JOIN orders 
+ON orders.website_session_id = website_sessions.website_session_id
+GROUP BY utm_source
+ORDER BY total_orders DESC;
+
+
+
+-- Top traffic sources : CS April 12 2012
+
+USE mavenfuzzyfactory;
+
+SELECT * FROM website_sessions;
+
+SELECT utm_source,utm_campaign,http_referer,COUNT(website_session_id) as sessions
+FROM website_sessions WHERE created_at < '2012-04-12' 
+GROUP BY utm_source,utm_campaign,http_referer ORDER BY sessions DESC; 
+
+USE mavenfuzzyfactory;
+
+SELECT utm_source,utm_campaign,http_referer,COUNT(website_session_id) as sessions 
+FROM website_Sessions
+WHERE created_at < '2012-04-12'
+GROUP BY utm_source,utm_campaign,http_referer
+ORDER BY sessions DESC; 
+
+USE mavenfuzzyfactory;
+
+SELECT COUNT(DISTINCT website_sessions.website_session_id) as sessions,
+COUNT(DISTINCT orders.order_id) as orders,
+ROUND(100*COUNT(DISTINCT orders.order_id)/COUNT(DISTINCT website_sessions.website_session_id),2) as conversion_rate
+FROM website_sessions LEFT JOIN orders ON 
+orders.website_session_id = website_sessions.website_session_id
+WHERE website_sessions.created_at < '2012-04-14'
+AND utm_source = 'gsearch' AND utm_campaign = 'nonbrand';
+
+
+
+-- COUNTing like in the case of a pivot table : 
+
+USE mavenfuzzyfactory; 
+
+SELECT primary_product_id, COUNT(DISTINCT CASE WHEN items_purchased=1 THEN order_id ELSE NULL END) as single_orders,
+COUNT(DISTINCT CASE WHEN items_purchased=2 THEN order_id ELSE NULL END) as double_orders,
+COUNT(DISTINCT order_id) as total_orders
+FROM orders
+GROUP BY primary_product_id;
+
+USE mavenfuzzyfactory; 
+
+-- till May 10 2012
+
+SELECT MIN(DATE(created_at)) as week_start,COUNT(DISTINCT website_sessions.website_session_id) as sessions
+FROM website_sessions
+WHERE website_sessions.created_at < '2012-05-10' AND website_sessions.utm_source = 'gsearch' AND 
+website_sessions.utm_campaign = 'nonbrand' 
+GROUP BY YEARWEEK(website_sessions.created_at);
+
+USE mavenfuzzyfactory; 
+
+
+
+SELECT website_sessions.device_type,
+COUNT(DISTINCT website_sessions.website_session_id) as sessions,
+COUNT(orders.order_id) as orders,
+ROUND(100*COUNT(orders.order_id)/COUNT(DISTINCT website_sessions.website_session_id),2) as cvr
+FROM website_sessions LEFT JOIN orders ON orders.website_session_id = website_sessions.website_session_id
+WHERE website_sessions.created_at < '2012-05-11' 
+AND utm_source = 'gsearch' AND utm_campaign = 'nonbrand' 
+GROUP BY website_sessions.device_type;
+
+
+SELECT MIN(DATE(website_sessions.created_at)) as start_date,
+COUNT(DISTINCT CASE WHEN device_type = 'desktop' THEN website_sessions.website_session_id ELSE NULL END) as desk_count, 
+COUNT(DISTINCT CASE WHEN device_type = 'mobile' THEN website_sessions.website_session_id ELSE NULL END) as mobile_count,
+COUNT(DISTINCT CASE WHEN device_type = 'desktop' THEN orders.order_id ELSE NULL END) as desk_orders,
+COUNT(DISTINCT CASE WHEN device_type = 'mobile' THEN orders.order_id ELSE NULL END) as mobile_orders,
+ROUND(100*COUNT(DISTINCT CASE WHEN device_type = 'desktop' THEN orders.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN device_type = 'desktop' THEN website_sessions.website_session_id ELSE NULL END),2) as cvr_desk,
+ROUND(100*COUNT(DISTINCT CASE WHEN device_type = 'mobile' THEN orders.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN device_type = 'mobile' THEN website_sessions.website_session_id ELSE NULL END),2) as cvr_mobile,
+ROUND(100*COUNT(DISTINCT orders.order_id)/COUNT(DISTINCT website_sessions.website_session_id),2) as net_cvr
+FROM website_sessions LEFT JOIN orders ON orders.website_session_id = website_sessions.website_session_id
+WHERE website_sessions.created_at < '2012-06-09' AND website_Sessions.created_at > '2012-04-15' 
+AND website_sessions.utm_source = 'gsearch' AND utm_campaign = 'nonbrand' 
+GROUP BY YEARWEEK(website_sessions.created_at);
+
+
+USE mavenfuzzyfactory; 
+
+SELECT pageview_url, COUNT(DISTINCT website_pageview_id) as views 
+FROM website_pageviews WHERE created_at < '2012-06-09'
+GROUP BY pageview_url 
+ORDER BY views DESC; 
+
+
+SELECT * FROM website_pageviews;
+
+DROP TABLE session_pageview;
+-- In order to JOIN : we make a temporary table!!! Used a lot 
+CREATE TEMPORARY TABLE session_pageview
+SELECT website_session_id,MIN(website_pageview_id) as pg_id FROM website_pageviews
+WHERE website_pageviews.created_at < '2012-06-12'
+GROUP BY website_session_id; 
+
+SELECT * FROM session_pageview;
+
+-- Now JOIN to find the landing pages : The pageview ID was created to be used to find the landing page. 
+
+SELECT website_pageviews.pageview_url as landing_page, COUNT(session_pageview.website_session_id) as sessions
+FROM session_pageview LEFT JOIN website_pageviews
+ON website_pageviews.website_pageview_id = session_pageview.pg_id
+WHERE website_pageviews.created_at < '2012-06-12'
+GROUP BY landing_page;
+
+
+-- Bounce Rates :
+
+USE mavenfuzzyfactory; 
+
+SELECT * FROM website_pageviews;
+
+-- Identify first pageview : 
+
+DROP TABLE session_pageview;
+-- In order to JOIN : we make a temporary table!!! Used a lot 
+CREATE TEMPORARY TABLE session_pageview 
+SELECT website_session_id,MIN(website_pageview_id) as page_id FROM website_pageviews 
+WHERE created_at < '2012-06-14'
+GROUP BY website_session_id; 
+
+-- Now find the landing pages and their corresponding number of sessions : 
+
+DROP TABLE landing_page;
+
+CREATE TEMPORARY TABLE landing_page 
+SELECT session_pageview.website_session_id,pageview_url
+FROM session_pageview LEFT JOIN website_pageviews ON session_pageview.page_id = website_pageviews.website_pageview_id;
+-- as expected all trafiic lands on the home page : created_at is respected 
+-- Now : Identified landing page for each of the website_sessions 
+
+-- Now : counting pageviews for each session : 
+
+DROP TABLE page_count;
+
+CREATE TEMPORARY TABLE page_count 
+SELECT website_session_id,COUNT(pageview_url) as pageviews FROM website_pageviews
+WHERE created_at < '2012-06-14' 
+GROUP BY website_session_id;
+
+-- Now Join the landing page and pagecount tables to be joined to find the bounce sessions and total sessions 
+SELECT pageview_url,COUNT(CASE WHEN pageviews=1 THEN 1 ELSE NULL END) as bounce_sessions,
+COUNT(pageviews) as total_sessions, 
+100*COUNT(CASE WHEN pageviews=1 THEN 1 ELSE NULL END)/COUNT(pageviews) as bounce_pct
+FROM landing_page LEFT JOIN page_count ON landing_page.website_session_id = page_count.website_session_id
+GROUP BY pageview_url; 
+
+
+
+
+-- lander-1 first date of creation : 28 July 
+
+
+USE mavenfuzzyfactory; 
+
+SELECT * FROM website_pageviews;
+
+-- Identify first pageview : do this till the End date do not put the start date filter here 
+
+DROP TABLE session_pageview;
+-- In order to JOIN : we make a temporary table!!! Used a lot 
+CREATE TEMPORARY TABLE session_pageview 
+SELECT website_session_id,MIN(website_pageview_id) as page_id FROM website_pageviews 
+WHERE created_at < '2012-07-28' AND website_pageviews.created_at >= '2012-06-19'
+GROUP BY website_session_id; 
+
+-- Now find the landing pages and their corresponding number of sessions : 
+
+DROP TABLE landing_page;
+
+
+CREATE TEMPORARY TABLE landing_page 
+SELECT session_pageview.website_session_id,pageview_url,website_pageviews.created_at
+FROM session_pageview LEFT JOIN website_pageviews ON session_pageview.page_id = website_pageviews.website_pageview_id
+WHERE pageview_url IN ('/home','/lander-1');
+
+SELECT * FROM landing_page;
+
+DROP TEMPORARY TABLE launch_date;
+
+CREATE TEMPORARY TABLE launch_date
+SELECT pageview_url,MIN(DATE(created_at)) as launch_date FROM landing_page
+GROUP BY pageview_url; 
+
+SELECT * FROM launch_date;
+
+-- NOW Finding Bounce Rates 
+
+DROP TEMPORARY TABLE page_count;
+
+CREATE TEMPORARY TABLE page_count 
+SELECT website_pageviews.website_session_id,COUNT(pageview_url) as pageviews FROM website_pageviews
+LEFT JOIN website_sessions ON website_sessions.website_session_id = website_pageviews.website_session_id
+WHERE website_pageviews.created_at < '2012-07-28' AND website_pageviews.created_at >= '2012-06-19'
+AND utm_source = 'gsearch' AND utm_campaign = 'nonbrand'
+GROUP BY website_session_id;
+
+SELECT * FROM page_count;
+
+-- Now Join the landing page and pagecount tables to be joined to find the bounce sessions and total sessions 
+SELECT pageview_url,COUNT(CASE WHEN pageviews=1 THEN 1 ELSE NULL END) as bounce_sessions,
+COUNT(pageviews) as total_sessions, 
+100*COUNT(CASE WHEN pageviews=1 THEN 1 ELSE NULL END)/COUNT(pageviews) as bounce_pct,
+MIN(DATE(created_at)) as analysis_start_date,
+MAX(DATE(created_at)) as analysis_last_date
+FROM landing_page RIGHT JOIN page_count ON landing_page.website_session_id = page_count.website_session_id
+WHERE pageview_url IS NOT NULL
+GROUP BY pageview_url; 
+-- WE do right JOIN because the page_count table factors in the start date (for an equal comparison) of the new lander page 
+
+
+
+SELECT utm_source,utm_campaign,MIN(DATE(created_at)),COUNT(*) FROM website_sessions
+GROUP BY utm_source,utm_campaign;
+
+
+
+
+-- 31st August Task All nonbrand traffic has been routed to lander-1 page 
+-- From June-1 to August 31
+
+
+USE mavenfuzzyfactory; 
+
+SELECT * FROM website_pageviews;
+
+-- Identify first pageview : do this till the End date do not put the start date filter here 
+
+DROP TABLE session_pageview;
+-- In order to JOIN : we make a temporary table!!! Used a lot 
+CREATE TEMPORARY TABLE session_pageview 
+SELECT website_session_id,MIN(website_pageview_id) as page_id FROM website_pageviews 
+WHERE created_at < '2012-08-31' AND website_pageviews.created_at >= '2012-06-01'
+GROUP BY website_session_id; 
+-- this table contains website_session id and the first pageview id associated with it 
+-- start date filter is not applied in this table 
+
+-- Now find the landing pages and their corresponding number of sessions : 
+
+DROP TABLE landing_page;
+
+
+CREATE TEMPORARY TABLE landing_page 
+SELECT session_pageview.website_session_id,pageview_url,website_pageviews.created_at
+FROM session_pageview LEFT JOIN website_pageviews ON session_pageview.page_id = website_pageviews.website_pageview_id;
+
+SELECT DISTINCT(pageview_url) FROM landing_page;
+-- this landing page table doesn't filter the end date but filters the start date 
+
+DROP TEMPORARY TABLE page_count;
+
+CREATE TEMPORARY TABLE page_count 
+SELECT website_pageviews.website_session_id,COUNT(pageview_url) as pageviews FROM website_pageviews
+LEFT JOIN website_sessions ON website_sessions.website_session_id = website_pageviews.website_session_id
+WHERE website_pageviews.created_at < '2012-08-31' AND website_pageviews.created_at >= '2012-06-01'
+AND utm_campaign = 'nonbrand' AND utm_source = 'gsearch'
+GROUP BY website_session_id;
+-- now website_session_id in the page_count table has become a primary key similarly it is a primary key for the landing page table
+
+SELECT * FROM page_count;
+
+SELECT * FROM landing_page;
+
+-- individual sessions and overall bounce rate 
+SELECT MIN(DATE(created_at)) as week_start,
+COUNT(CASE WHEN pageview_url = '/home' THEN 1 ELSE NULL END) as home_sessions,
+COUNT(CASE WHEN pageview_url = '/lander-1' THEN 1 ELSE NULL END) as lander_sessions,
+COUNT(pageviews) as total_sessions, 
+100*COUNT(CASE WHEN pageviews=1 THEN 1 ELSE NULL END)/COUNT(pageviews) as bounce_pct
+FROM landing_page RIGHT JOIN page_count ON landing_page.website_session_id = page_count.website_session_id
+GROUP BY YEARWEEK(created_at); 
+
+-- September 05 Task : No need to find the landing page : as all sessions land on the lander-1 page
+-- Just to get and idea of the Count of IDs : 
+SELECT COUNT(DISTINCT website_pageviews.website_session_id) FROM website_pageviews LEFT JOIN website_sessions ON 
+website_pageviews.website_session_id = website_sessions.website_session_id
+WHERE website_pageviews.created_at > '2012-08-05' AND website_pageviews.created_at < '2012-09-05'
+AND utm_source = 'gsearch' AND utm_campaign = 'nonbrand';
+
+DROP TABLE boolean_pageview; 
+
+CREATE TEMPORARY TABLE boolean_pageview
+SELECT website_pageviews.website_session_id, pageview_url,website_pageviews.created_at,
+CASE WHEN pageview_url = '/lander-1' THEN 1 ELSE 0 END as lander_count,
+CASE WHEN pageview_url = '/products' THEN 1 ELSE 0 END as products_count,
+CASE WHEN pageview_url = '/the-original-mr-fuzzy' THEN 1 ELSE 0 END as mr_fuzzy_count,
+CASE WHEN pageview_url = '/cart' THEN 1 ELSE 0 END as cart_count,
+CASE WHEN pageview_url = '/shipping' THEN 1 ELSE 0 END as shipping_count,
+CASE WHEN pageview_url = '/billing' THEN 1 ELSE 0 END as billing_count,
+CASE WHEN pageview_url = '/thank-you-for-your-order' THEN 1 ELSE 0 END as thank_you_count
+FROM website_pageviews LEFT JOIN website_sessions ON 
+website_pageviews.website_session_id = website_sessions.website_session_id
+WHERE website_pageviews.created_at > '2012-08-05' AND website_pageviews.created_at < '2012-09-05'
+AND utm_source = 'gsearch' AND utm_campaign = 'nonbrand';
+
+-- Now for each session to count the number of times it visited a particular page 
+
+SELECT * FROM boolean_pageview;
+
+-- Assume that the total sessions land on lander-1
+SELECT 
+ROUND(100*COUNT(CASE WHEN products_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN lander_count=1 THEN 1 ELSE NULL END),2)
+ as lander_click_rate,
+ ROUND(100*COUNT(CASE WHEN mr_fuzzy_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN products_count=1 THEN 1 ELSE NULL END),2)
+ as products_click_rate,
+ ROUND(100*COUNT(CASE WHEN cart_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN mr_fuzzy_count=1 THEN 1 ELSE NULL END),2)
+ as mrfuzzy_click_rate,
+ ROUND(100*COUNT(CASE WHEN shipping_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN cart_count=1 THEN 1 ELSE NULL END),2)
+ as cart_click_rate,
+ ROUND(100*COUNT(CASE WHEN billing_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN shipping_count=1 THEN 1 ELSE NULL END),2)
+ as shipping_click_rate,
+ ROUND(100*COUNT(CASE WHEN thank_you_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN billing_count=1 THEN 1 ELSE NULL END),2)
+ as billing_click_rate
+FROM boolean_pageview;
+
+
+-- Updated Billing Page : Billing and Billing-2 50/50 test 
+
+-- first date at which launch of billing-2 was done : 
+SELECT MIN(DATE(created_at)) as billing_2_launch_date FROM website_pageviews
+WHERE pageview_url = '/billing-2'
+GROUP BY pageview_url;
+
+SELECT * FROM orders;
+
+SELECT COUNT(*) as total_orders_in_range FROM orders
+WHERE created_at > '2012-09-10' AND created_at < '2012-11-10';
+
+SELECT COUNT(*) as billing_sessions,
+COUNT(order_id) as orders,
+ROUND(100*COUNT(order_id)/COUNT(*),2) as billing_to_order_rt
+FROM website_pageviews
+LEFT JOIN orders ON website_pageviews.website_session_id = orders.website_session_id
+WHERE pageview_url IN ('/billing','/billing-2') AND
+website_pageviews.created_at > '2012-09-10' AND website_pageviews.created_at < '2012-11-10'
+GROUP BY pageview_url;
+
+
+
+-- Mid Course Project : 
+-- Sessions and Orders Monthly Trends : gsearch : Till 27 November 
+
+SELECT * FROM website_sessions;
+SELECT * FROM orders;
+
+-- Monthly trends : 
+
+SELECT 
+MONTH(DATE(website_sessions.created_at)) as month,
+YEAR(DATE(website_sessions.created_at)) as year,
+COUNT(DISTINCT website_sessions.website_session_id) as sessions, 
+COUNT(DISTINCT order_id) as orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2012-11-27' AND website_sessions.utm_source = 'gsearch'
+GROUP BY 1,2;
+
+
+
+-- Now splitting nonbrand and brand campaigns separately 
+
+SELECT 
+MONTH(DATE(website_sessions.created_at)) as month,
+YEAR(DATE(website_sessions.created_at)) as year,
+COUNT(DISTINCT CASE WHEN utm_campaign = 'nonbrand' THEN website_sessions.website_session_id ELSE NULL END) as non_brand_sessions, 
+COUNT(DISTINCT CASE WHEN utm_campaign = 'nonbrand' THEN orders.order_id ELSE NULL END) as non_brand_orders,
+COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN website_sessions.website_session_id ELSE NULL END) as brand_sessions, 
+COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN orders.order_id ELSE NULL END) as brand_orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2012-11-27' AND website_sessions.utm_source = 'gsearch'
+GROUP BY 1,2;
+
+-- Splitting on the basis of device type : 
+SELECT 
+MONTH(DATE(website_sessions.created_at)) as month,
+YEAR(DATE(website_sessions.created_at)) as year,
+COUNT(DISTINCT CASE WHEN device_type = 'desktop' THEN website_sessions.website_session_id ELSE NULL END) as desktop_sessions, 
+COUNT(DISTINCT CASE WHEN device_type = 'desktop' THEN orders.order_id ELSE NULL END) as desktop_orders,
+COUNT(DISTINCT CASE WHEN device_type = 'mobile' THEN website_sessions.website_session_id ELSE NULL END) as mobile_sessions, 
+COUNT(DISTINCT CASE WHEN device_type = 'mobile' THEN orders.order_id ELSE NULL END) as mobile_orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2012-11-27' AND website_sessions.utm_source = 'gsearch' AND utm_campaign = 'nonbrand'
+GROUP BY 1,2;
+
+-- Now for all of our channels : 
+
+SELECT 
+MONTH(DATE(website_sessions.created_at)) as month,
+YEAR(DATE(website_sessions.created_at)) as year,
+COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' THEN website_sessions.website_session_id ELSE NULL END) as gsearch_sessions, 
+COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' THEN orders.order_id ELSE NULL END) as gsearch_orders,
+COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' THEN website_sessions.website_session_id ELSE NULL END) as bsearch_sessions, 
+COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' THEN orders.order_id ELSE NULL END) as bsearch_orders,
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NOT NULL THEN website_sessions.website_session_id ELSE NULL END) as organic_sessions,
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NOT NULL THEN orders.order_id ELSE NULL END) as organic_orders,
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NULL THEN website_sessions.website_session_id ELSE NULL END) as direct_sessions,
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NULL THEN orders.order_id ELSE NULL END) as direct_orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2012-11-27'
+GROUP BY 1,2;
+
+-- session to order conversion rate : Overall 
+
+SELECT 
+MONTH(DATE(website_sessions.created_at)) as month,
+YEAR(DATE(website_sessions.created_at)) as year,
+COUNT(DISTINCT website_sessions.website_session_id) as sessions, 
+COUNT(DISTINCT order_id) as orders,
+ROUND(100*COUNT(DISTINCT order_id)/COUNT(DISTINCT website_sessions.website_session_id),2) as conv_rate
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2012-11-27'
+GROUP BY 1,2;
+
+
+-- Estimation of Increase in Revenue which the lander-1 Test earned us : 19 June to 28 July 
+-- First find the conversion rates for the home and lander-1 pages during that time period : 
+-- Then see the increase in conversion rate for the lander-1 page
+-- Then count the total sessions associated with the nonbrand campaign 28 July till 27 November 
+--  Using the incremental conversion rate find extra orders which were generated by the lander-1 page which was the landing page after July 28
+
+-- lander-1 first date of creation : 
+
+
+USE mavenfuzzyfactory; 
+
+SELECT * FROM website_pageviews;
+
+
+DROP TABLE session_pageview;
+-- In order to JOIN : we make a temporary table!!! Used a lot 
+CREATE TEMPORARY TABLE session_pageview 
+SELECT website_pageviews.website_session_id,MIN(website_pageview_id) as page_id FROM website_pageviews LEFT JOIN website_sessions 
+ON website_pageviews.website_session_id = website_sessions.website_session_id
+WHERE website_pageviews.created_at < '2012-07-28' AND website_pageviews.created_at > '2012-06-19' 
+AND utm_source = 'gsearch' AND utm_campaign = 'nonbrand'
+GROUP BY website_session_id; 
+
+-- Now find the landing pages and their corresponding number of sessions : 
+
+SELECT * FROM session_pageview;
+
+DROP TABLE landing_page;
+
+
+CREATE TEMPORARY TABLE landing_page 
+SELECT session_pageview.website_session_id,pageview_url
+FROM session_pageview LEFT JOIN website_pageviews ON session_pageview.page_id = website_pageviews.website_pageview_id
+WHERE pageview_url IN ('/home','/lander-1');
+
+SELECT * FROM landing_page;
+
+-- Now get the sessions and Orders Data 
+
+SELECT pageview_url,COUNT(DISTINCT landing_page.website_session_id) as sessions,COUNT(DISTINCT order_id) as orders,
+ROUND(100*COUNT(DISTINCT order_id)/COUNT(DISTINCT landing_page.website_session_id),2) as conversion_rate
+FROM landing_page LEFT JOIN orders ON landing_page.website_session_id=orders.website_session_id 
+GROUP BY pageview_url;
+
+-- 0.83% improvement on an average in the % conversion rate 
+
+-- Now : nonbrand sessions : since 28 July : 
+
+-- first find the last date when the traffic was sent to home : 
+SELECT pageview_url, MAX(DATE(website_pageviews.created_at)) as recent_date
+FROM website_pageviews LEFT JOIN website_sessions ON 
+website_pageviews.website_session_id = website_sessions.website_session_id
+WHERE pageview_url = '/home' AND website_pageviews.created_at < '2012-11-27' AND utm_campaign = 'nonbrand' 
+AND utm_source = 'gsearch'
+GROUP BY pageview_url; 
+
+-- 30th July was the last date for /home lander page 
+-- Now count the total sessions from that point onwards : 
+
+SELECT COUNT(DISTINCT website_session_id) as sessions 
+FROM website_sessions 
+WHERE created_at < '2012-11-27' AND created_at > '2012-07-30'
+AND utm_campaign = 'nonbrand';
+-- We have not put gsearch filter here as all nonbrand sessions was asked 
+
+-- --> 28K sessions : 0.0083*28000 = 232.4 : 4 months : 50+ Order Increase Per Month on an average 
+
+-- 19th June to 28 July : Website Pageviews gsearch nonbrand traffic 
+-- complete (full) conversion funnel for the 2 landing pages 
+-- For each website_session we have the pages we visit and thus we just have to link the landing page
+-- to each website_session
+
+-- landing page : find min website_pageview_id as we want the first page for every session
+-- then join on website_sessions table so as to limit urself to gsearch and nonbrand 
+-- then join the original website_pageviews table to link to the first pageview_url : landing page 
+DROP TABLE website_session_landing_page;
+
+CREATE TABLE website_session_landing_page
+SELECT website_pageviews.website_session_id,pageview_url as lander_page
+FROM website_pageviews RIGHT JOIN
+(
+SELECT website_pageviews.website_session_id,MIN(website_pageview_id) as page_id
+FROM website_pageviews INNER JOIN 
+website_sessions ON website_pageviews.website_session_id = website_sessions.website_session_id
+WHERE website_pageviews.created_at < '2012-07-28' AND website_pageviews.created_at > '2012-06-19'
+AND utm_source = 'gsearch' AND utm_campaign = 'nonbrand'
+GROUP BY website_session_id
+) as session_page ON website_pageviews.website_pageview_id = session_page.page_id 
+WHERE pageview_url IN ('/home','/lander-1'); 
+
+SELECT * FROM website_session_landing_page;
+
+-- Now for every gsearch nonbrand website_session between 19 June and 28 July : construct a Boolean Table 
+-- do with above filtered website_sessions : 
+
+SELECT lander_page,
+COUNT(DISTINCT website_session_landing_page.website_session_id) as total_sessions,
+ROUND(100*COUNT(products_bool)/COUNT(DISTINCT website_session_landing_page.website_session_id),2) as lander_rt,
+ROUND(100*COUNT(fuzzy_bool)/COUNT(products_bool),2) as product_rt,
+ROUND(100*COUNT(cart_bool)/COUNT(fuzzy_bool),2) as mrfuzzy_rt,
+ROUND(100*COUNT(shipping_bool)/COUNT(cart_bool),2) as cart_rt,
+ROUND(100*COUNT(billing_bool)/COUNT(shipping_bool),2) as shipping_rt,
+ROUND(100*COUNT(order_complete_bool)/COUNT(billing_bool),2) as billing_rt,
+ROUND(100*COUNT(order_complete_bool)/COUNT(DISTINCT website_session_landing_page.website_session_id),2) as overall_rt
+FROM website_session_landing_page INNER JOIN  
+(
+SELECT website_session_landing_page.website_session_id,
+pageview_url,
+-- CASE WHEN pageview_url = '/home' THEN 1 ELSE 0 END as home_bool,
+-- CASE WHEN pageview_url = '/lander-1' THEN 1 ELSE 0 END as lander_1_bool,
+CASE WHEN pageview_url = '/the-original-mr-fuzzy' THEN 1 ELSE NULL END as fuzzy_bool,
+CASE WHEN pageview_url = '/products' THEN 1 ELSE NULL END as products_bool,
+CASE WHEN pageview_url = '/cart' THEN 1 ELSE NULL END as cart_bool,
+CASE WHEN pageview_url = '/shipping' THEN 1 ELSE NULL END as shipping_bool,
+CASE WHEN pageview_url = '/billing' THEN 1 ELSE NULL END as billing_bool,
+CASE WHEN pageview_url = '/thank-you-for-your-order' THEN 1 ELSE NULL END as order_complete_bool
+FROM website_session_landing_page INNER JOIN website_pageviews 
+ON website_session_landing_page.website_session_id = website_pageviews.website_session_id) as bool_info
+ON website_session_landing_page.website_session_id = bool_info.website_session_id
+GROUP BY lander_page;
+
+-- Quantify the Impact of our New Billing Page : Revenue per Billing page session 
+-- Number of Billing page sessions from the last month 
+-- Sept 10 to Nov 10 all traffic 
+
+
+SELECT 
+website_pageviews.pageview_url,
+SUM(orders.price_usd)/COUNT(DISTINCT website_pageviews.website_session_id) as revenue_per_session
+FROM website_pageviews LEFT JOIN orders ON website_pageviews.website_session_id = orders.website_session_id
+WHERE pageview_url IN ('/billing','/billing-2') AND website_pageviews.created_at > '2012-09-10' AND 
+website_pageviews.created_at < '2012-11-10'
+GROUP BY website_pageviews.pageview_url;
+
+-- LEFT Join is important above : Inner JOIN will just give as the common rows between the two tables 
+
+-- $ 8.34 average improvement per session 
+
+-- Now find out the Billing page sessions for the last month : 
+
+SELECT COUNT(DISTINCT website_pageviews.website_session_id) as billing_sessions_last_month
+FROM website_pageviews
+WHERE pageview_url IN ('/billing','/billing-2')
+AND created_at < '2012-11-27' AND created_at > '2012-10-27';
+
+-- 1091 billing sessions : 8.34*1091  = $10k approx lift in revenue 
+
+
+-- Expanded Channel Portfolio : 29th November Mr. Tom Parmeshan 
+
+SELECT MIN(DATE(created_at)) as start_date,
+COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' THEN website_session_id ELSE NULL END) as gsearch_sessions,
+COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' THEN website_session_id ELSE NULL END) as bsearch_sessions,
+ROUND(100*COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' THEN website_session_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' THEN website_session_id ELSE NULL END),2)
+as bsearch_pct_of_gsearch
+FROM website_sessions
+WHERE created_at > '2012-08-22' AND created_at < '2012-11-29' AND utm_campaign ='nonbrand'
+GROUP BY YEARWEEK(created_at);
+
+-- 30th November Tom Parmeshan Task : Comparing our channels 
+
+SELECT utm_source, COUNT(DISTINCT website_session_id) as total_sessions,
+COUNT(DISTINCT CASE WHEN device_type = 'mobile' THEN website_session_id ELSE NULL END) as mobile_sessions,
+ROUND(100*COUNT(DISTINCT CASE WHEN device_type = 'mobile' THEN website_session_id ELSE NULL END)/COUNT(DISTINCT website_session_id),2)
+as pct_mobile
+FROM website_sessions 
+WHERE created_at > '2012-08-22' AND created_at < '2012-11-30' AND utm_campaign = 'nonbrand' 
+GROUP BY utm_source; 
+
+-- 01 December Tom Parmeshan Task : 
+
+SELECT device_type,utm_source,
+COUNT(DISTINCT website_sessions.website_session_id) as sessions,
+COUNT(DISTINCT order_id) as orders,
+ROUND(100*COUNT(DISTINCT order_id)/COUNT(DISTINCT website_sessions.website_session_id),2) as conversion_rate
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2012-09-18' AND website_sessions.created_at > '2012-08-22'
+AND utm_campaign = 'nonbrand'  
+GROUP BY device_type,utm_source;
+
+-- Tom Parmesan 22 Dec Query : 
+
+SELECT MIN(DATE(created_at)) as start_date,
+COUNT(DISTINCT CASE WHEN device_type='mobile' AND utm_source = 'gsearch' THEN website_session_id ELSE NULL END) as gsearch_mobile,
+COUNT(DISTINCT CASE WHEN device_type='mobile' AND utm_source = 'bsearch' THEN website_session_id ELSE NULL END) as bsearch_mobile,
+COUNT(DISTINCT CASE WHEN device_type='mobile' AND utm_source = 'bsearch' THEN website_session_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN device_type='mobile' AND utm_source = 'gsearch' THEN website_session_id ELSE NULL END)
+as b_pct_g_mobile,
+COUNT(DISTINCT CASE WHEN device_type='desktop' AND utm_source = 'gsearch' THEN website_session_id ELSE NULL END) as gsearch_desktop,
+COUNT(DISTINCT CASE WHEN device_type='desktop' AND utm_source = 'bsearch' THEN website_session_id ELSE NULL END) as bsearch_desktop,
+COUNT(DISTINCT CASE WHEN device_type='desktop' AND utm_source = 'bsearch' THEN website_session_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN device_type='desktop' AND utm_source = 'gsearch' THEN website_session_id ELSE NULL END)
+as b_pct_g_desktop
+FROM website_sessions 
+WHERE created_at > '2012-11-04' AND created_at < '2012-12-22'
+AND utm_campaign = 'nonbrand'
+GROUP BY YEARWEEK(created_at);
+
+
+-- 23rd December : Site traffic breakdown 
+
+SELECT * FROM website_sessions;
+
+DROP TABLE traffic_sources; 
+
+CREATE TEMPORARY TABLE traffic_sources
+SELECT created_at,website_session_id,
+CASE 
+	WHEN utm_source IS NULL AND http_referer IN ('https://www.gsearch.com','https://www.bsearch.com') THEN 'organic'
+    WHEN utm_source IS NULL AND http_referer IS NULL THEN 'direct'
+    WHEN utm_campaign = 'nonbrand' THEN 'nonbrand'
+    WHEN utm_campaign = 'brand' THEN 'brand'
+END as traffic_source
+FROM website_sessions
+WHERE created_at < '2012-12-23';
+
+-- Now from the traffic sources table : do counting 
+
+SELECT YEAR(created_at) as year,
+MONTH(created_at),
+COUNT(DISTINCT CASE WHEN traffic_source = 'nonbrand' THEN website_session_id ELSE NULL END) as nonbrand,
+COUNT(DISTINCT CASE WHEN traffic_source = 'brand' THEN website_session_id ELSE NULL END) as nonbrand,
+ROUND(100*COUNT(DISTINCT CASE WHEN traffic_source = 'brand' THEN website_session_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN traffic_source = 'nonbrand' THEN website_session_id ELSE NULL END),2)
+as brand_pct_nonbrand,
+COUNT(DISTINCT CASE WHEN traffic_source = 'direct' THEN website_session_id ELSE NULL END) as direct,
+ROUND(100*COUNT(DISTINCT CASE WHEN traffic_source = 'direct' THEN website_session_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN traffic_source = 'nonbrand' THEN website_session_id ELSE NULL END),2)
+as direct_pct_nonbrand,
+COUNT(DISTINCT CASE WHEN traffic_source = 'organic' THEN website_session_id ELSE NULL END) as organic,
+ROUND(100*COUNT(DISTINCT CASE WHEN traffic_source = 'organic' THEN website_session_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN traffic_source = 'nonbrand' THEN website_session_id ELSE NULL END),2)
+as organic_pct_nonbrand
+FROM traffic_sources
+GROUP BY 1,2;
+
+-- 02 Jan 2023 : Cindy Sharp Task : Sessions and Orders by Monthly and Weekly Volume 
+
+SELECT YEAR(website_sessions.created_at) as Year,MONTH(website_sessions.created_at) as Month, 
+COUNT(DISTINCT website_sessions.website_session_id) as Sessions,
+COUNT(DISTINCT orders.order_id) as Orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_Session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2013-01-01'
+GROUP BY 1,2;
+
+-- Now do the same as Weekly Trend : 
+
+SELECT MIN(DATE(website_sessions.created_at)) as week_start, 
+COUNT(DISTINCT website_sessions.website_session_id) as Sessions,
+COUNT(DISTINCT orders.order_id) as Orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_Session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2013-01-01'
+GROUP BY YEARWEEK(DATE(website_sessions.created_at));
+
+-- January 05 Task Cindy Sharp : CEO 
+-- Directly use the Average Aggregation type here 
+-- We want the Average both by hour of the day and also by the Week of the day 
+-- First calculate Monday and 0 hour sessions and then divide by the number of days (AVG) 
+-- See Notes for the Explanation of the Query Below : IMPORTANT 
+USE mavenfuzzyfactory;
+
+SELECT hr,
+ROUND(AVG(CASE WHEN wkday=0 THEN website_sessions ELSE NULL END),1) as mon,
+ROUND(AVG(CASE WHEN wkday=1 THEN website_sessions ELSE NULL END),1) as tue,
+ROUND(AVG(CASE WHEN wkday=2 THEN website_sessions ELSE NULL END),1) as wed,
+ROUND(AVG(CASE WHEN wkday=3 THEN website_sessions ELSE NULL END),1) as thurs,
+ROUND(AVG(CASE WHEN wkday=4 THEN website_sessions ELSE NULL END),1) as fri,
+ROUND(AVG(CASE WHEN wkday=5 THEN website_sessions ELSE NULL END),1) as sat,
+ROUND(AVG(CASE WHEN wkday=6 THEN website_sessions ELSE NULL END),1) as sun
+FROM 
+(SELECT DATE(created_at),WEEKDAY(created_at) as wkday,
+HOUR(created_at) as hr,
+COUNT(DISTINCT website_session_id) as website_sessions
+FROM website_sessions WHERE created_at BETWEEN '2012-09-15' AND '2012-11-15' GROUP BY 1,2,3)
+daily_hourly_sessions
+GROUP BY hr;
+-- results are different from John's results but it's okay
+
+-- 04 January 2013 : Sales Trends Task : 
+-- Number of Sales, Total Revenue, Total Margin 
+
+SELECT YEAR(created_at) as year,
+MONTH(created_at) as month,
+COUNT(DISTINCT order_id) as num_sales,
+SUM(price_usd) as tot_revenue,
+SUM(price_usd-cogs_usd) as tot_margin
+FROM orders
+WHERE created_at < '2013-01-04'
+GROUP BY 1,2;
+
+
+-- 05 April 2013 : Impact of New Product Launch : 
+SELECT YEAR(website_sessions.created_at) as yr, MONTH(website_sessions.created_at) as mo,
+COUNT(DISTINCT order_id) as orders,
+COUNT(DISTINCT website_sessions.website_session_id) as sessions,
+ROUND(100*COUNT(DISTINCT order_id)/COUNT(DISTINCT website_sessions.website_session_id),2) as conversion_rate,
+SUM(price_usd)/COUNT(DISTINCT website_sessions.website_session_id) as revenue_per_session,
+COUNT(DISTINCT CASE WHEN primary_product_id=1 THEN order_id ELSE NULL END) as product_one_orders,
+COUNT(DISTINCT CASE WHEN primary_product_id=2 THEN order_id ELSE NULL END) as product_two_orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2013-04-01' AND  website_sessions.created_at > '2012-04-01'
+GROUP BY 1,2;
+
+-- 06 April 2014 Task : Look at the search sessions which hit the products page 
+-- Then before the 2nd product product launch there are 2 choices : Abandon the products page 
+-- Or goto Mr. Fuzzy page. After the new product launch we have 3 choices : Abandon, fuzzy or lovebear 
+
+-- Pre 2nd product launch Before 06th January 2013 
+
+-- First find those website_sessions and website_pageview_id which visited the /products page 
+DROP TABLE products_sessions_pageviews;
+CREATE TEMPORARY TABLE products_sessions_pageviews
+SELECT website_pageview_id, website_session_id,
+CASE WHEN created_at < '2013-01-06' THEN 'pre_product_2' ELSE 'post_product_2' END as time_period
+FROM website_pageviews
+WHERE pageview_url = '/products' AND created_at < '2013-04-06' AND created_at > '2012-10-06';
+
+SELECT * FROM products_sessions_pageviews;
+
+-- Now for each of those sessions above find whether the fuzzy and lovebear pages have been 
+-- visited or not
+-- then do simple groupby of our time_period field : Boom Results Tally 
+
+SELECT time_period,COUNT(DISTINCT website_session_id) as sessions,
+(SUM(fuzzy)+SUM(love_bear))/COUNT(DISTINCT website_session_id) as total_conv,
+SUM(fuzzy) as to_mr_fuzzy,
+SUM(fuzzy)/COUNT(DISTINCT website_session_id) as fuzzy_conv,
+SUM(love_bear) as to_love_bear,
+SUM(love_bear)/COUNT(DISTINCT website_session_id) as love_bear_conv
+FROM 
+(
+SELECT website_pageviews.website_session_id,time_period,
+CASE WHEN pageview_url = '/the-original-mr-fuzzy' THEN 1 ELSE 0 END as fuzzy,
+CASE WHEN pageview_url = '/the-forever-love-bear' THEN 1 ELSE 0 END as love_bear
+FROM website_pageviews INNER JOIN products_sessions_pageviews ON products_sessions_pageviews.website_session_id = 
+website_pageviews.website_session_id) sub_query
+GROUP BY time_period; 
+-- Note that INNER JOIN can give you repeated entries : Just that it works on the basis of intersection 
+-- Outer Join works on the basis of Union 
+
+-- 10 April Product Wise Conversion Funnels : From 6th January 
+-- Conversion funnel 
+
+-- First find out those sessions which have either lovebear of mr_fuzzy : In the specified Date range 
+DROP TABLE lovebear_fuzzy_sessions;
+CREATE TEMPORARY TABLE lovebear_fuzzy_sessions
+SELECT website_session_id,pageview_url
+FROM website_pageviews 
+WHERE created_at < '2013-04-10' AND created_at > '2013-01-06' 
+AND pageview_url IN ('/the-original-mr-fuzzy','/the-forever-love-bear');
+
+SELECT * FROM lovebear_fuzzy_sessions;
+
+-- Now construct a Boolean Table for funnel conversion analysis : 
+-- Only for those website_sessions which visit the fuzzy and the lovebear pages 
+-- VVIMP. Multiple Instances of the Billing Page Exist : VVIMPORTANT 
+SELECT DISTINCT(pageview_url) FROM website_pageviews
+WHERE created_at < '2013-04-10' AND created_at > '2013-01-06';
+
+DROP TABLE boolean_table_lovebear_fuzzy;
+CREATE TEMPORARY TABLE boolean_table_lovebear_fuzzy
+SELECT website_pageviews.website_session_id,
+lovebear_fuzzy_sessions.pageview_url,
+CASE WHEN website_pageviews.pageview_url='/cart' THEN 1 ELSE 0 END as cart,
+CASE WHEN website_pageviews.pageview_url='/shipping' THEN 1 ELSE 0 END as shipping,
+CASE WHEN website_pageviews.pageview_url IN ('/billing','/billing-2') THEN 1 ELSE 0 END as billing,
+CASE WHEN website_pageviews.pageview_url='/thank-you-for-your-order' THEN 1 ELSE 0 END as thank_you
+FROM website_pageviews INNER JOIN lovebear_fuzzy_sessions ON 
+website_pageviews.website_session_id = lovebear_fuzzy_sessions.website_session_id;
+
+-- Now aggregate the so constructed boolean table : 
+
+SELECT pageview_url,
+COUNT(DISTINCT website_session_id) as sessions,
+SUM(cart)/COUNT(DISTINCT website_session_id) as product_rt,
+SUM(shipping)/SUM(cart) as cart_rt,
+SUM(billing)/SUM(shipping) as shipping_rt,
+SUM(thank_you)/SUM(billing) as billing_rt
+FROM boolean_table_lovebear_fuzzy
+GROUP BY pageview_url;
+
+-- Yes we are getting comparable results : That was a tricky one !!!
+
+-- Pages after the /cart page : website_pageview_id+1 : and same website_session 
+-- Cindy Sharp Nov 22, 2013 Task : 
+DROP TABLE cart_website_pageview_session;
+CREATE TEMPORARY TABLE cart_website_pageview_session
+SELECT website_pageview_id,
+website_session_id 
+FROM website_pageviews
+WHERE created_at > '2013-08-25' AND created_at < '2013-10-25' AND pageview_url = '/cart';
+
+SELECT COUNT(DISTINCT website_session_id) FROM cart_website_pageview_session;
+
+-- Good : we have found the first page after the /cart page so that we can compute the click through rate 
+DROP TABLE pages_after_cart;
+CREATE TEMPORARY TABLE pages_after_cart
+SELECT website_pageviews.website_pageview_id,website_pageviews.website_session_id,
+pageview_url,
+CASE WHEN created_at < '2013-09-25' THEN 'pre_cross' ELSE 'post_cross' END as time_period,
+FIRST_VALUE(pageview_url) OVER (
+        PARTITION BY website_pageviews.website_session_id
+    ) jump_after_cart          -- page visited right after the cart page : for all the website_session_id s
+FROM website_pageviews INNER JOIN cart_website_pageview_session
+ON website_pageviews.website_session_id = cart_website_pageview_session.website_session_id
+AND website_pageviews.website_pageview_id > cart_website_pageview_session.website_pageview_id;
+
+-- Pages visited immediately after the cart page :
+
+SELECT COUNT(DISTINCT website_session_id) FROM pages_after_cart;
+
+SELECT DISTINCT(jump_after_cart) FROM pages_after_cart;
+-- Only the shipping page in the current date range 
+
+-- Now use the pages after cart and the orders table to construct our matrix : 
+
+DROP TABLE pages_after_cart;
+CREATE TEMPORARY TABLE pages_after_cart
+SELECT website_pageviews.website_pageview_id,website_pageviews.website_session_id,
+pageview_url,
+CASE WHEN created_at < '2013-09-25' THEN 'pre_cross' ELSE 'post_cross' END as time_period      -- page visited right after the cart page : for all the website_session_id s
+FROM website_pageviews INNER JOIN cart_website_pageview_session
+ON website_pageviews.website_session_id = cart_website_pageview_session.website_session_id;
+
+SELECT * FROM pages_after_cart;
+
+SELECT * FROM orders;
+-- CASE is Just incredibly powerful here :
+SELECT time_period,COUNT(DISTINCT pages_after_cart.website_session_id) as cart_sessions, -- already filtered on those sessions which contain cart 
+COUNT(DISTINCT CASE WHEN pageview_url = '/shipping' THEN pages_after_cart.website_session_id ELSE NULL END) as clickthrough,
+COUNT(DISTINCT CASE WHEN pageview_url = '/shipping' THEN pages_after_cart.website_session_id ELSE NULL END)/COUNT(DISTINCT pages_after_cart.website_session_id) as cart_ctr,
+SUM(CASE WHEN pageview_url = '/thank-you-for-your-order' THEN items_purchased ELSE 0 END)/COUNT(DISTINCT order_id)
+as products_per_order,
+SUM(CASE WHEN pageview_url = '/thank-you-for-your-order' THEN price_usd ELSE 0 END)/COUNT(DISTINCT order_id)
+as aov,
+SUM(CASE WHEN pageview_url = '/thank-you-for-your-order' THEN price_usd ELSE 0 END)/COUNT(DISTINCT pages_after_cart.website_session_id)
+as rev_per_cart_sess
+FROM pages_after_cart LEFT JOIN orders ON pages_after_cart.website_session_id = orders.website_session_id
+GROUP BY time_period;
+
+-- 12 January 2014 Cindy Sharp Request : 
+-- 12 December is the Mid-Range A month Before and a Month after 
+
+SELECT time_period,
+COUNT(DISTINCT order_id)/COUNT(DISTINCT website_session_id) as conv_rate,
+SUM(price_usd)/COUNT(DISTINCT order_id) as aov,
+SUM(items_purchased)/COUNT(DISTINCT order_id) as products_per_order,
+SUM(price_usd)/COUNT(DISTINCT website_session_id) as revenue_per_session
+FROM 
+(
+SELECT website_sessions.website_session_id,
+orders.items_purchased,
+orders.order_id,
+orders.price_usd,
+CASE WHEN website_sessions.created_at < '2013-12-12' THEN 'pre_bear' ELSE 'post_bear' END as time_period
+FROM website_sessions LEFT JOIN orders ON orders.website_session_id = website_sessions.website_session_id
+WHERE website_sessions.created_at < '2014-01-12' AND website_sessions.created_at > '2013-11-12') as subquery 
+GROUP BY time_period;
+
+-- So adding a 3rd product Bear has increased our core metrics : 
+SELECT * FROM order_items;
+
+SELECT * FROM order_item_refunds;
+
+SELECT YEAR(order_items.created_at) as Yr,
+MONTH(order_items.created_at) as Mth,
+COUNT(DISTINCT CASE WHEN order_items.product_id = 1 THEN order_items.order_id ELSE NULL END) as prod1_orders,
+ROUND(100*COUNT(DISTINCT CASE WHEN order_items.product_id = 1 THEN order_item_refunds.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN order_items.product_id = 1 THEN order_items.order_id ELSE NULL END),2)
+as prod1_rf_rt,
+COUNT(DISTINCT CASE WHEN order_items.product_id = 2 THEN order_items.order_id ELSE NULL END) as prod2_orders,
+ROUND(100*COUNT(DISTINCT CASE WHEN order_items.product_id = 2 THEN order_item_refunds.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN order_items.product_id = 2 THEN order_items.order_id ELSE NULL END),2)
+as prod2_rf_rt,
+COUNT(DISTINCT CASE WHEN order_items.product_id = 3 THEN order_items.order_id ELSE NULL END) as prod3_orders,
+ROUND(100*COUNT(DISTINCT CASE WHEN order_items.product_id = 3 THEN order_item_refunds.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN order_items.product_id = 3 THEN order_items.order_id ELSE NULL END),2)
+as prod3_rf_rt,
+COUNT(DISTINCT CASE WHEN order_items.product_id = 4 THEN order_items.order_id ELSE NULL END) as prod4_orders,
+ROUND(100*COUNT(DISTINCT CASE WHEN order_items.product_id = 4 THEN order_item_refunds.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN order_items.product_id = 4 THEN order_items.order_id ELSE NULL END),2)
+as prod4_rf_rt
+FROM order_items LEFT JOIN order_item_refunds ON order_items.order_item_id = order_item_refunds.order_item_id
+WHERE order_items.created_at < '2014-10-15'
+GROUP BY 1,2;
+
+
+-- Tom Parmesan Nov 01 2014 : Simple Repeat sessions : 
+SELECT tot_sessions-1 as repeat_sessions, COUNT(user_id) as users FROM 
+(
+SELECT user_id,COUNT(is_repeat_session) as tot_sessions
+FROM website_sessions 
+WHERE created_at < '2014-11-01' AND created_at > '2014-01-01'
+GROUP BY user_id) as subquery
+GROUP BY tot_sessions;
+
+-- How many of our new users in the given time period also have repeat sessions : 
+-- Identify new sessions in our given time period : (is_repeat_session=0)
+-- Then for these sessions (note the user id) : find the number of times repeat session flag is 1
+-- Then group by that repeat session flag and count unique user_id in order to find the repeat_session users 
+
+-- First Find the New Sessions in the Given Date range : 
+
+DROP TABLE new_users_in_range; 
+CREATE TEMPORARY TABLE new_users_in_range
+SELECT website_session_id,user_id
+FROM website_sessions 
+WHERE created_at > '2014-01-01' AND created_at < '2014-11-01' AND 
+is_repeat_session = 0; 
+
+-- Now for these new sessions : COUNT THE Number of Repeat Sessions 
+SELECT repeat_sessions-1, COUNT(user_id) as users
+FROM (
+SELECT website_sessions.user_id,
+COUNT(website_sessions.is_repeat_session) as repeat_sessions -- do not do distinct here 
+FROM website_sessions INNER JOIN new_users_in_range
+ON website_sessions.user_id = new_users_in_range.user_id -- new users in the current range 
+WHERE created_at > '2014-01-01' AND created_at < '2014-11-01'
+GROUP BY 1) as subquery
+GROUP BY 1
+ORDER BY 1;
+-- the new users which have repeat sessions 
+
+
+
+-- Average MIN and MAX days from first to second session : 
+
+-- first find the new users in the time period 
+-- then amongst the new users filter the repeat users
+-- then for those repeat users find the first created_at and the second created_at timestamps 
+USE mavenfuzzyfactory; 
+
+DROP TABLE new_users_in_range; 
+CREATE TEMPORARY TABLE new_users_in_range
+SELECT website_session_id,user_id
+FROM website_sessions 
+WHERE created_at > '2014-01-01' AND created_at < '2014-11-01' AND 
+is_repeat_session = 0; 
+
+
+DROP TABLE first_repeat_session; 
+CREATE TEMPORARY TABLE first_repeat_session
+SELECT new_users_in_range.user_id, MIN(website_sessions.created_at) as frp
+FROM new_users_in_range INNER JOIN website_sessions ON 
+new_users_in_range.user_id = website_sessions.user_id
+WHERE created_at > '2014-01-01' AND created_at < '2014-11-01' AND 
+is_repeat_session = 1
+GROUP BY 1
+ORDER BY 2;
+
+SELECT AVG(days_between_sessions),MIN(days_between_sessions),MAX(days_between_sessions) FROM 
+(
+SELECT first_repeat_session.user_id,
+DATEDIFF(MIN(first_repeat_session.frp),MIN(website_sessions.created_at)) as days_between_sessions
+FROM first_repeat_session INNER JOIN website_sessions ON first_repeat_session.user_id = website_sessions.user_id
+GROUP BY 1
+ORDER BY 2
+) as subquery; 
+
+SELECT * FROM website_sessions WHERE user_id = '203654';
+
+-- Now 05 Nov. 2014 Task Tom Parmesan 
+
+SELECT * FROM website_sessions;
+
+
+

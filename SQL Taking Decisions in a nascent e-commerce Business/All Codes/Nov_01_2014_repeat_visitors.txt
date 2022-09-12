@@ -1,0 +1,37 @@
+
+
+-- Tom Parmesan Nov 01 2014 : Simple Repeat sessions : 
+SELECT tot_sessions-1 as repeat_sessions, COUNT(user_id) as users FROM 
+(
+SELECT user_id,COUNT(is_repeat_session) as tot_sessions
+FROM website_sessions 
+WHERE created_at < '2014-11-01' AND created_at > '2014-01-01'
+GROUP BY user_id) as subquery
+GROUP BY tot_sessions;
+
+-- How many of our new users in the given time period also have repeat sessions : 
+-- Identify new sessions in our given time period : (is_repeat_session=0)
+-- Then for these sessions (note the user id) : find the number of times repeat session flag is 1
+-- Then group by that repeat session flag and count unique user_id in order to find the repeat_session users 
+
+-- First Find the New Sessions in the Given Date range : 
+
+DROP TABLE new_users_in_range; 
+CREATE TEMPORARY TABLE new_users_in_range
+SELECT website_session_id,user_id
+FROM website_sessions 
+WHERE created_at > '2014-01-01' AND created_at < '2014-11-01' AND 
+is_repeat_session = 0; 
+
+-- Now for these new sessions : COUNT THE Number of Repeat Sessions 
+SELECT repeat_sessions-1, COUNT(user_id) as users
+FROM (
+SELECT website_sessions.user_id,
+COUNT(website_sessions.is_repeat_session) as repeat_sessions -- do not do distinct here 
+FROM website_sessions INNER JOIN new_users_in_range
+ON website_sessions.user_id = new_users_in_range.user_id -- new users in the current range 
+WHERE created_at > '2014-01-01' AND created_at < '2014-11-01'
+GROUP BY 1) as subquery
+GROUP BY 1
+ORDER BY 1;
+-- the new users which have repeat sessions 

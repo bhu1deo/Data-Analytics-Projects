@@ -1,0 +1,45 @@
+
+-- September 05 Task : No need to find the landing page : as all sessions land on the lander-1 page
+-- Just to get and idea of the Count of IDs : 
+SELECT COUNT(DISTINCT website_pageviews.website_session_id) FROM website_pageviews LEFT JOIN website_sessions ON 
+website_pageviews.website_session_id = website_sessions.website_session_id
+WHERE website_pageviews.created_at > '2012-08-05' AND website_pageviews.created_at < '2012-09-05'
+AND utm_source = 'gsearch' AND utm_campaign = 'nonbrand';
+
+DROP TABLE boolean_pageview; 
+
+CREATE TEMPORARY TABLE boolean_pageview
+SELECT website_pageviews.website_session_id, pageview_url,website_pageviews.created_at,
+CASE WHEN pageview_url = '/lander-1' THEN 1 ELSE 0 END as lander_count,
+CASE WHEN pageview_url = '/products' THEN 1 ELSE 0 END as products_count,
+CASE WHEN pageview_url = '/the-original-mr-fuzzy' THEN 1 ELSE 0 END as mr_fuzzy_count,
+CASE WHEN pageview_url = '/cart' THEN 1 ELSE 0 END as cart_count,
+CASE WHEN pageview_url = '/shipping' THEN 1 ELSE 0 END as shipping_count,
+CASE WHEN pageview_url = '/billing' THEN 1 ELSE 0 END as billing_count,
+CASE WHEN pageview_url = '/thank-you-for-your-order' THEN 1 ELSE 0 END as thank_you_count
+FROM website_pageviews LEFT JOIN website_sessions ON 
+website_pageviews.website_session_id = website_sessions.website_session_id
+WHERE website_pageviews.created_at > '2012-08-05' AND website_pageviews.created_at < '2012-09-05'
+AND utm_source = 'gsearch' AND utm_campaign = 'nonbrand';
+
+-- Now for each session to count the number of times it visited a particular page 
+
+SELECT * FROM boolean_pageview;
+
+-- Assume that the total sessions land on lander-1
+SELECT 
+ROUND(100*COUNT(CASE WHEN products_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN lander_count=1 THEN 1 ELSE NULL END),2)
+ as lander_click_rate,
+ ROUND(100*COUNT(CASE WHEN mr_fuzzy_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN products_count=1 THEN 1 ELSE NULL END),2)
+ as products_click_rate,
+ ROUND(100*COUNT(CASE WHEN cart_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN mr_fuzzy_count=1 THEN 1 ELSE NULL END),2)
+ as mrfuzzy_click_rate,
+ ROUND(100*COUNT(CASE WHEN shipping_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN cart_count=1 THEN 1 ELSE NULL END),2)
+ as cart_click_rate,
+ ROUND(100*COUNT(CASE WHEN billing_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN shipping_count=1 THEN 1 ELSE NULL END),2)
+ as shipping_click_rate,
+ ROUND(100*COUNT(CASE WHEN thank_you_count=1 THEN 1 ELSE NULL END)/COUNT(CASE WHEN billing_count=1 THEN 1 ELSE NULL END),2)
+ as billing_click_rate
+FROM boolean_pageview;
+
+

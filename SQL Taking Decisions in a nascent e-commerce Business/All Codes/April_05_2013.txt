@@ -1,0 +1,12 @@
+
+-- 05 April 2013 : Impact of New Product Launch : 
+SELECT YEAR(website_sessions.created_at) as yr, MONTH(website_sessions.created_at) as mo,
+COUNT(DISTINCT order_id) as orders,
+COUNT(DISTINCT website_sessions.website_session_id) as sessions,
+ROUND(100*COUNT(DISTINCT order_id)/COUNT(DISTINCT website_sessions.website_session_id),2) as conversion_rate,
+SUM(price_usd)/COUNT(DISTINCT website_sessions.website_session_id) as revenue_per_session,
+COUNT(DISTINCT CASE WHEN primary_product_id=1 THEN order_id ELSE NULL END) as product_one_orders,
+COUNT(DISTINCT CASE WHEN primary_product_id=2 THEN order_id ELSE NULL END) as product_two_orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2013-04-01' AND  website_sessions.created_at > '2012-04-01'
+GROUP BY 1,2;

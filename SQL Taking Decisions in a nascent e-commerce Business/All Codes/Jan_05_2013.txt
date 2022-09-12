@@ -1,0 +1,24 @@
+-- January 05 Task Cindy Sharp : CEO 
+-- Directly use the Average Aggregation type here 
+-- We want the Average both by hour of the day and also by the Week of the day 
+-- First calculate Monday and 0 hour sessions and then divide by the number of days (AVG) 
+-- See Notes for the Explanation of the Query Below : IMPORTANT 
+USE mavenfuzzyfactory;
+
+SELECT hr,
+ROUND(AVG(CASE WHEN wkday=0 THEN website_sessions ELSE NULL END),1) as mon,
+ROUND(AVG(CASE WHEN wkday=1 THEN website_sessions ELSE NULL END),1) as tue,
+ROUND(AVG(CASE WHEN wkday=2 THEN website_sessions ELSE NULL END),1) as wed,
+ROUND(AVG(CASE WHEN wkday=3 THEN website_sessions ELSE NULL END),1) as thurs,
+ROUND(AVG(CASE WHEN wkday=4 THEN website_sessions ELSE NULL END),1) as fri,
+ROUND(AVG(CASE WHEN wkday=5 THEN website_sessions ELSE NULL END),1) as sat,
+ROUND(AVG(CASE WHEN wkday=6 THEN website_sessions ELSE NULL END),1) as sun
+FROM 
+(SELECT DATE(created_at),WEEKDAY(created_at) as wkday,
+HOUR(created_at) as hr,
+COUNT(DISTINCT website_session_id) as website_sessions
+FROM website_sessions WHERE created_at BETWEEN '2012-09-15' AND '2012-11-15' GROUP BY 1,2,3)
+daily_hourly_sessions
+GROUP BY hr;
+-- results are different from John's results but it's okay
+

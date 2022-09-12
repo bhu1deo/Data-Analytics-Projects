@@ -1,0 +1,19 @@
+
+-- Now 05 Nov. 2014 Task Tom Parmesan 
+USE mavenfuzzyfactory;
+
+SELECT 
+CASE 
+	WHEN utm_source IS NULL AND http_referer IS NULL THEN 'direct' 
+    WHEN utm_source IS NULL AND http_referer IS NOT NULL THEN 'organic'
+    WHEN utm_source IS NOT NULL AND utm_campaign = 'nonbrand' THEN 'paid_nonbrand'
+    WHEN utm_source IS NOT NULL AND utm_campaign = 'brand' THEN 'paid_brand'
+    WHEN utm_source = 'socialbook' THEN 'paid_social' 
+    ELSE 'Other' END as channel_group,
+COUNT(CASE WHEN is_repeat_session=0 THEN 1 ELSE NULL END) as new_sessions,
+COUNT(CASE WHEN is_repeat_session=1 THEN 1 ELSE NULL END) as repeat_sessions
+FROM website_sessions 
+WHERE created_at BETWEEN '2014-01-01' AND '2014-11-05'
+GROUP BY 1
+ORDER BY 3 DESC;
+-- can group by case columns also !!!! 

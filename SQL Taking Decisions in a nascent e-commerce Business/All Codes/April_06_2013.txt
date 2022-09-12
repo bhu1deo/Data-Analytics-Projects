@@ -1,0 +1,36 @@
+-- 06 April 2014 Task : Look at the search sessions which hit the products page 
+-- Then before the 2nd product product launch there are 2 choices : Abandon the products page 
+-- Or goto Mr. Fuzzy page. After the new product launch we have 3 choices : Abandon, fuzzy or lovebear 
+
+-- Pre 2nd product launch Before 06th January 2013 
+
+-- First find those website_sessions and website_pageview_id which visited the /products page 
+DROP TABLE products_sessions_pageviews;
+CREATE TEMPORARY TABLE products_sessions_pageviews
+SELECT website_pageview_id, website_session_id,
+CASE WHEN created_at < '2013-01-06' THEN 'pre_product_2' ELSE 'post_product_2' END as time_period
+FROM website_pageviews
+WHERE pageview_url = '/products' AND created_at < '2013-04-06' AND created_at > '2012-10-06';
+
+SELECT * FROM products_sessions_pageviews;
+
+-- Now for each of those sessions above find whether the fuzzy and lovebear pages have been 
+-- visited or not
+-- then do simple groupby of our time_period field : Boom Results Tally 
+
+SELECT time_period,COUNT(DISTINCT website_session_id) as sessions,
+(SUM(fuzzy)+SUM(love_bear))/COUNT(DISTINCT website_session_id) as total_conv,
+SUM(fuzzy) as to_mr_fuzzy,
+SUM(fuzzy)/COUNT(DISTINCT website_session_id) as fuzzy_conv,
+SUM(love_bear) as to_love_bear,
+SUM(love_bear)/COUNT(DISTINCT website_session_id) as love_bear_conv
+FROM 
+(
+SELECT website_pageviews.website_session_id,time_period,
+CASE WHEN pageview_url = '/the-original-mr-fuzzy' THEN 1 ELSE 0 END as fuzzy,
+CASE WHEN pageview_url = '/the-forever-love-bear' THEN 1 ELSE 0 END as love_bear
+FROM website_pageviews INNER JOIN products_sessions_pageviews ON products_sessions_pageviews.website_session_id = 
+website_pageviews.website_session_id) sub_query
+GROUP BY time_period; 
+-- Note that INNER JOIN can give you repeated entries : Just that it works on the basis of intersection 
+-- Outer Join works on the basis of Union 

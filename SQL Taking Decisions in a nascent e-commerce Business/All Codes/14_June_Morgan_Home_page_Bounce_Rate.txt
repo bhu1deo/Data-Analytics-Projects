@@ -1,0 +1,39 @@
+
+USE mavenfuzzyfactory; 
+
+SELECT * FROM website_pageviews;
+
+-- Identify first pageview : 
+
+DROP TABLE session_pageview;
+-- In order to JOIN : we make a temporary table!!! Used a lot 
+CREATE TEMPORARY TABLE session_pageview 
+SELECT website_session_id,MIN(website_pageview_id) as page_id FROM website_pageviews 
+WHERE created_at < '2012-06-14' 
+GROUP BY website_session_id; 
+
+-- Now find the landing pages and their corresponding number of sessions : 
+
+DROP TABLE landing_page;
+
+CREATE TEMPORARY TABLE landing_page 
+SELECT session_pageview.website_session_id,pageview_url
+FROM session_pageview LEFT JOIN website_pageviews ON session_pageview.page_id = website_pageviews.website_pageview_id;
+-- as expected all trafiic lands on the home page : created_at is respected 
+-- Now : Identified landing page for each of the website_sessions 
+
+-- Now : counting pageviews for each session : 
+
+DROP TABLE page_count;
+
+CREATE TEMPORARY TABLE page_count 
+SELECT website_session_id,COUNT(pageview_url) as pageviews FROM website_pageviews
+WHERE created_at < '2012-06-14' 
+GROUP BY website_session_id;
+
+-- Now Join the landing page and pagecount tables to be joined to find the bounce sessions and total sessions 
+SELECT pageview_url,COUNT(CASE WHEN pageviews=1 THEN 1 ELSE NULL END) as bounce_sessions,
+COUNT(pageviews) as total_sessions, 
+100*COUNT(CASE WHEN pageviews=1 THEN 1 ELSE NULL END)/COUNT(pageviews) as bounce_pct
+FROM landing_page LEFT JOIN page_count ON landing_page.website_session_id = page_count.website_session_id
+GROUP BY pageview_url; 

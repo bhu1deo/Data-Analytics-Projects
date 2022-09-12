@@ -1,0 +1,7 @@
+USE mavenfuzzyfactory; 
+
+SELECT primary_product_id, COUNT(DISTINCT CASE WHEN items_purchased=1 THEN order_id ELSE NULL END) as single_orders,
+COUNT(DISTINCT CASE WHEN items_purchased=2 THEN order_id ELSE NULL END) as double_orders,
+COUNT(DISTINCT order_id) as total_orders
+FROM orders
+GROUP BY primary_product_id;

@@ -1,0 +1,18 @@
+
+SELECT YEAR(order_items.created_at) as Yr,
+MONTH(order_items.created_at) as Mth,
+COUNT(DISTINCT CASE WHEN order_items.product_id = 1 THEN order_items.order_id ELSE NULL END) as prod1_orders,
+ROUND(100*COUNT(DISTINCT CASE WHEN order_items.product_id = 1 THEN order_item_refunds.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN order_items.product_id = 1 THEN order_items.order_id ELSE NULL END),2)
+as prod1_rf_rt,
+COUNT(DISTINCT CASE WHEN order_items.product_id = 2 THEN order_items.order_id ELSE NULL END) as prod2_orders,
+ROUND(100*COUNT(DISTINCT CASE WHEN order_items.product_id = 2 THEN order_item_refunds.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN order_items.product_id = 2 THEN order_items.order_id ELSE NULL END),2)
+as prod2_rf_rt,
+COUNT(DISTINCT CASE WHEN order_items.product_id = 3 THEN order_items.order_id ELSE NULL END) as prod3_orders,
+ROUND(100*COUNT(DISTINCT CASE WHEN order_items.product_id = 3 THEN order_item_refunds.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN order_items.product_id = 3 THEN order_items.order_id ELSE NULL END),2)
+as prod3_rf_rt,
+COUNT(DISTINCT CASE WHEN order_items.product_id = 4 THEN order_items.order_id ELSE NULL END) as prod4_orders,
+ROUND(100*COUNT(DISTINCT CASE WHEN order_items.product_id = 4 THEN order_item_refunds.order_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN order_items.product_id = 4 THEN order_items.order_id ELSE NULL END),2)
+as prod4_rf_rt
+FROM order_items LEFT JOIN order_item_refunds ON order_items.order_item_id = order_item_refunds.order_item_id
+WHERE order_items.created_at < '2014-10-15'
+GROUP BY 1,2;

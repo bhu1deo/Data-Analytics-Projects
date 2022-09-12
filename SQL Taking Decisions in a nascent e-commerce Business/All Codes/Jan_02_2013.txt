@@ -1,0 +1,17 @@
+-- 02 Jan 2023 : Cindy Sharp Task : Sessions and Orders by Monthly and Weekly Volume 
+
+SELECT YEAR(website_sessions.created_at) as Year,MONTH(website_sessions.created_at) as Month, 
+COUNT(DISTINCT website_sessions.website_session_id) as Sessions,
+COUNT(DISTINCT orders.order_id) as Orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_Session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2013-01-01'
+GROUP BY 1,2;
+
+-- Now do the same as Weekly Trend : 
+
+SELECT MIN(DATE(website_sessions.created_at)) as week_start, 
+COUNT(DISTINCT website_sessions.website_session_id) as Sessions,
+COUNT(DISTINCT orders.order_id) as Orders
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_Session_id = orders.website_session_id
+WHERE website_sessions.created_at < '2013-01-01'
+GROUP BY YEARWEEK(DATE(website_sessions.created_at));

@@ -1,0 +1,20 @@
+-- Updated Billing Page : Billing and Billing-2 50/50 test 
+
+-- first date at which launch of billing-2 was done : 
+SELECT MIN(DATE(created_at)) as billing_2_launch_date FROM website_pageviews
+WHERE pageview_url = '/billing-2'
+GROUP BY pageview_url;
+
+SELECT * FROM orders;
+
+SELECT COUNT(*) as total_orders_in_range FROM orders
+WHERE created_at > '2012-09-10' AND created_at < '2012-11-10';
+
+SELECT COUNT(*) as billing_sessions,
+COUNT(order_id) as orders,
+ROUND(100*COUNT(order_id)/COUNT(*),2) as billing_to_order_rt
+FROM website_pageviews
+LEFT JOIN orders ON website_pageviews.website_session_id = orders.website_session_id
+WHERE pageview_url IN ('/billing','/billing-2') AND
+website_pageviews.created_at > '2012-09-10' AND website_pageviews.created_at < '2012-11-10'
+GROUP BY pageview_url;

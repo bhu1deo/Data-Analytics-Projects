@@ -1,0 +1,19 @@
+
+-- 12 January 2014 Cindy Sharp Request : 
+-- 12 December is the Mid-Range A month Before and a Month after 
+
+SELECT time_period,
+COUNT(DISTINCT order_id)/COUNT(DISTINCT website_session_id) as conv_rate,
+SUM(price_usd)/COUNT(DISTINCT order_id) as aov,
+SUM(items_purchased)/COUNT(DISTINCT order_id) as products_per_order,
+SUM(price_usd)/COUNT(DISTINCT website_session_id) as revenue_per_session
+FROM 
+(
+SELECT website_sessions.website_session_id,
+orders.items_purchased,
+orders.order_id,
+orders.price_usd,
+CASE WHEN website_sessions.created_at < '2013-12-12' THEN 'pre_bear' ELSE 'post_bear' END as time_period
+FROM website_sessions LEFT JOIN orders ON orders.website_session_id = website_sessions.website_session_id
+WHERE website_sessions.created_at < '2014-01-12' AND website_sessions.created_at > '2013-11-12') as subquery 
+GROUP BY time_period;

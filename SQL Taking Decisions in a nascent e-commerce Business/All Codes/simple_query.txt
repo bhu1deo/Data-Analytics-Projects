@@ -1,0 +1,15 @@
+USE mavenfuzzyfactory;
+
+
+SELECT * FROM website_sessions;
+
+SELECT * FROm orders;
+
+SELECT utm_source,
+COUNT(DISTINCT website_sessions.website_session_id) as total_sessions,
+COUNT(DISTINCT orders.order_id) as total_orders,
+100*COUNT(DISTINCT orders.order_id)/COUNT(DISTINCT website_sessions.website_session_id) as conversion_rate
+FROM website_sessions LEFT JOIN orders 
+ON orders.website_session_id = website_sessions.website_session_id
+GROUP BY utm_source
+ORDER BY total_orders DESC;

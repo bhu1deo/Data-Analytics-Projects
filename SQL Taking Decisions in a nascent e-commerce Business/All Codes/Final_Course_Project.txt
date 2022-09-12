@@ -1,0 +1,150 @@
+
+-- Final Course Project :: 
+
+-- Session and Order Volume Growth : Trended By Quarter By the Life of the Business 
+USE mavenfuzzyfactory;
+SELECT * FROM website_sessions;
+SELECT * FROM orders;
+
+SELECT YEAR(website_sessions.created_at) as Yr,
+QUARTER(website_sessions.created_at) as Qtr,
+COUNT(DISTINCT website_sessions.website_session_id) as session_volume,
+COUNT(DISTINCT order_id) as order_volume,
+ROUND(100*(COUNT(DISTINCT order_id)-LAG(COUNT(DISTINCT order_id),1) OVER())/(LAG(COUNT(DISTINCT order_id),1) OVER()),2) prev_year_order_volume
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+GROUP BY 1,2
+ORDER BY 1,2;
+-- We are leaving the Current Quarter as it is : One could do Volume per % of Quarter Also 
+
+
+
+-- 2nd Task in Final Product : 
+SELECT YEAR(website_sessions.created_at) as Yr,
+QUARTER(website_sessions.created_at) as Qtr,
+ROUND(100*COUNT(DISTINCT order_id)/COUNT(DISTINCT website_sessions.website_session_id),2) as cvr,
+ROUND((SUM(price_usd)/COUNT(DISTINCT order_id)),2) as rev_per_order,
+ROUND((SUM(price_usd)/COUNT(DISTINCT website_sessions.website_session_id)),2) as rev_per_session
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+GROUP BY 1,2
+ORDER BY 1,2;
+
+
+
+
+-- 3rd task : Quarterly View of Orders By Gsearch NonBrand Bsearch NonBrand 
+-- Brand Search Overall, Organic Search, Direct Type in 
+-- Quarterly Orders 
+
+SELECT YEAR(website_sessions.created_at) as Yr,
+QUARTER(website_sessions.created_at) as Qtr,
+COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' AND utm_campaign = 'nonbrand' THEN orders.order_id ELSE NULL END) as gsearch_nonbrand, 
+COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign = 'nonbrand' THEN orders.order_id ELSE NULL END) as bsearch_nonbrand,
+COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN orders.order_id ELSE NULL END) as brand,
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NOT NULL THEN orders.order_id ELSE NULL END) as organic_search,
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NULL THEN orders.order_id ELSE NULL END) as direct_typein
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+GROUP BY 1,2
+ORDER BY 1,2;
+
+
+-- 4th Task 
+-- Overall session to order conversion rates for the above channels and then see where we did optimizations: 
+SELECT YEAR(website_sessions.created_at) as Yr,
+QUARTER(website_sessions.created_at) as Qtr,
+COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' AND utm_campaign = 'nonbrand' THEN orders.order_id ELSE NULL END)/
+COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' AND utm_campaign = 'nonbrand' THEN website_sessions.website_session_id ELSE NULL END)
+as gsearch_nonbrand, 
+COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign = 'nonbrand' THEN orders.order_id ELSE NULL END)/
+COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' AND utm_campaign = 'nonbrand' THEN website_sessions.website_session_id ELSE NULL END)
+as bsearch_nonbrand,
+COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN orders.order_id ELSE NULL END)/
+COUNT(DISTINCT CASE WHEN utm_campaign = 'brand' THEN website_sessions.website_session_id ELSE NULL END) 
+as brand,
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NOT NULL THEN orders.order_id ELSE NULL END)/
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NOT NULL THEN website_sessions.website_session_id ELSE NULL END)
+as organic_search,
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NULL THEN orders.order_id ELSE NULL END)/
+COUNT(DISTINCT CASE WHEN utm_source IS NULL AND http_referer IS NULL THEN website_sessions.website_session_id ELSE NULL END)
+as direct_typein
+FROM website_sessions LEFT JOIN orders ON website_sessions.website_session_id = orders.website_session_id
+GROUP BY 1,2
+ORDER BY 1,2;
+
+
+-- 5th Task
+-- Monthly Revenue and Margin by product : 
+
+SELECT * FROM order_items;
+-- order_id might be repeated above : order_item_id is the primary key 
+
+SELECT YEAR(created_at) as Yr,MONTH(created_at) as Mth,
+SUM(CASE WHEN product_id=1 THEN price_usd ELSE 0 END) as product_1_revenue,
+SUM(CASE WHEN product_id=1 THEN price_usd-cogs_usd ELSE 0 END) as product_1_margin,
+SUM(CASE WHEN product_id=2 THEN price_usd ELSE 0 END) as product_2_revenue,
+SUM(CASE WHEN product_id=2 THEN price_usd-cogs_usd ELSE 0 END) as product_2_margin,
+SUM(CASE WHEN product_id=3 THEN price_usd ELSE 0 END) as product_3_revenue,
+SUM(CASE WHEN product_id=3 THEN price_usd-cogs_usd ELSE 0 END) as product_3_margin,
+SUM(CASE WHEN product_id=4 THEN price_usd ELSE 0 END) as product_4_revenue,
+SUM(CASE WHEN product_id=4 THEN price_usd-cogs_usd ELSE 0 END) as product_4_margin,
+SUM(price_usd) as revenue,
+SUM(price_usd-cogs_usd) as margin
+FROM order_items
+GROUP BY 1,2; 
+
+
+
+
+ -- 6th Task : 
+ -- Monthly sessions to the /products page 
+ -- How % of sessions clicking through to another page has changed over time 
+ -- Conversion rate from the products page to the orders page : improvements 
+ 
+ -- Find out which website_sessions contained the products page 
+ -- Find out the list of Next pages in that particular product page 
+ -- Then find the clickthrough rate for those identified sessions 
+ -- Also find the products_to_orders conversion rate 
+ 
+
+ SELECT YEAR(subquery.created_at) as Yr,MONTH(subquery.created_at) as Mth, 
+ COUNT(DISTINCT website_pageviews.website_session_id) as product_proceed_sessions,
+ COUNT(DISTINCT subquery.website_session_id) as total_sessions,
+ COUNT(DISTINCT website_pageviews.website_session_id)/ COUNT(DISTINCT subquery.website_session_id) as products_conv_rate,
+ COUNT(DISTINCT CASE WHEN pageview_url = '/thank-you-for-your-order' THEN website_pageviews.website_session_id ELSE NULL END)/COUNT(DISTINCT subquery.website_session_id) as products_order_conv_rate
+ FROM website_pageviews RIGHT JOIN 
+ (
+  SELECT created_at,website_session_id,website_pageview_id FROM website_pageviews 
+ WHERE pageview_url = '/products'
+ ) as subquery ON website_pageviews.website_session_id = subquery.website_session_id AND 
+ website_pageviews.website_pageview_id > subquery.website_pageview_id
+ GROUP BY 1,2;
+ 
+
+-- 7th Task 
+ -- each product cross sells from one another --> 
+ -- total orders divided by the product category & the cross sell rate from Dec 05 2014 : 
+ 
+
+ 
+ DROP TABLE cross_orders; 
+ CREATE TEMPORARY TABLE cross_orders
+ SELECT orders.primary_product_id as primary_prod,
+ order_items.product_id as cross_prod,
+ COUNT(orders.order_id) as total_orders
+ FROM orders LEFT JOIN order_items ON orders.order_id = order_items.order_id AND order_items.is_primary_item = 0
+ WHERE orders.created_at > '2014-12-05'
+ GROUP BY 1,2
+ ORDER BY 1 ASC;
+ 
+SELECT * FROM cross_orders;
+ 
+SELECT primary_prod, SUM(total_orders) as total_orders,
+SUM(CASE WHEN cross_prod=1 THEN total_orders ELSE 0 END) as prod_1_cross_sell,
+SUM(CASE WHEN cross_prod=2 THEN total_orders ELSE 0 END) as prod_2_cross_sell,
+SUM(CASE WHEN cross_prod=3 THEN total_orders ELSE 0 END) as prod_3_cross_sell,
+SUM(CASE WHEN cross_prod=4 THEN total_orders ELSE 0 END) as prod_4_cross_sell
+FROM cross_orders
+GROUP BY 1;
+
+
+
+

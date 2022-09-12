@@ -1,0 +1,60 @@
+
+-- Pages after the /cart page : website_pageview_id+1 : and same website_session 
+-- Cindy Sharp Nov 22, 2013 Task : 
+DROP TABLE cart_website_pageview_session;
+CREATE TEMPORARY TABLE cart_website_pageview_session
+SELECT website_pageview_id,
+website_session_id 
+FROM website_pageviews
+WHERE created_at > '2013-08-25' AND created_at < '2013-10-25' AND pageview_url = '/cart';
+
+SELECT COUNT(DISTINCT website_session_id) FROM cart_website_pageview_session;
+
+-- Good : we have found the first page after the /cart page so that we can compute the click through rate 
+DROP TABLE pages_after_cart;
+CREATE TEMPORARY TABLE pages_after_cart
+SELECT website_pageviews.website_pageview_id,website_pageviews.website_session_id,
+pageview_url,
+CASE WHEN created_at < '2013-09-25' THEN 'pre_cross' ELSE 'post_cross' END as time_period,
+FIRST_VALUE(pageview_url) OVER (
+        PARTITION BY website_pageviews.website_session_id
+    ) jump_after_cart          -- page visited right after the cart page : for all the website_session_id s
+FROM website_pageviews INNER JOIN cart_website_pageview_session
+ON website_pageviews.website_session_id = cart_website_pageview_session.website_session_id
+AND website_pageviews.website_pageview_id > cart_website_pageview_session.website_pageview_id;
+
+-- Pages visited immediately after the cart page :
+
+SELECT COUNT(DISTINCT website_session_id) FROM pages_after_cart;
+
+SELECT DISTINCT(jump_after_cart) FROM pages_after_cart;
+-- Only the shipping page in the current date range 
+
+-- Now use the pages after cart and the orders table to construct our matrix : 
+
+DROP TABLE pages_after_cart;
+CREATE TEMPORARY TABLE pages_after_cart
+SELECT website_pageviews.website_pageview_id,website_pageviews.website_session_id,
+pageview_url,
+CASE WHEN created_at < '2013-09-25' THEN 'pre_cross' ELSE 'post_cross' END as time_period      -- page visited right after the cart page : for all the website_session_id s
+FROM website_pageviews INNER JOIN cart_website_pageview_session
+ON website_pageviews.website_session_id = cart_website_pageview_session.website_session_id;
+
+SELECT * FROM pages_after_cart;
+
+SELECT * FROM orders;
+-- CASE is Just incredibly powerful here :
+SELECT time_period,COUNT(DISTINCT pages_after_cart.website_session_id) as cart_sessions, -- already filtered on those sessions which contain cart 
+COUNT(DISTINCT CASE WHEN pageview_url = '/shipping' THEN pages_after_cart.website_session_id ELSE NULL END) as clickthrough,
+COUNT(DISTINCT CASE WHEN pageview_url = '/shipping' THEN pages_after_cart.website_session_id ELSE NULL END)/COUNT(DISTINCT pages_after_cart.website_session_id) as cart_ctr,
+SUM(CASE WHEN pageview_url = '/thank-you-for-your-order' THEN items_purchased ELSE 0 END)/COUNT(DISTINCT order_id)
+as products_per_order,
+SUM(CASE WHEN pageview_url = '/thank-you-for-your-order' THEN price_usd ELSE 0 END)/COUNT(DISTINCT order_id)
+as aov,
+SUM(CASE WHEN pageview_url = '/thank-you-for-your-order' THEN price_usd ELSE 0 END)/COUNT(DISTINCT pages_after_cart.website_session_id)
+as rev_per_cart_sess
+FROM pages_after_cart LEFT JOIN orders ON pages_after_cart.website_session_id = orders.website_session_id
+GROUP BY time_period;
+
+
+-- So adding a 3rd product Bear has increased our core metrics : 

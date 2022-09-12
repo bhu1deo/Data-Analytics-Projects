@@ -1,0 +1,11 @@
+
+-- Expanded Channel Portfolio : 29th November Mr. Tom Parmeshan 
+
+SELECT MIN(DATE(created_at)) as start_date,
+COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' THEN website_session_id ELSE NULL END) as gsearch_sessions,
+COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' THEN website_session_id ELSE NULL END) as bsearch_sessions,
+ROUND(100*COUNT(DISTINCT CASE WHEN utm_source = 'bsearch' THEN website_session_id ELSE NULL END)/COUNT(DISTINCT CASE WHEN utm_source = 'gsearch' THEN website_session_id ELSE NULL END),2)
+as bsearch_pct_of_gsearch
+FROM website_sessions
+WHERE created_at > '2012-08-22' AND created_at < '2012-11-29' AND utm_campaign ='nonbrand'
+GROUP BY YEARWEEK(created_at);
