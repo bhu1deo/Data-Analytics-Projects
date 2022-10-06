@@ -48,7 +48,7 @@
 
 **Dataset-1:** 
 
-Tableau Project Dataset and Details: We have a superstore dataset at our hand. We have sales, profit, discount, returns as our measures. We also have some qualitative dimensions. 
+Tableau Project Dataset and Details: We have a superstore dataset at our hand. We have sales, quantity, profit, discount, returns as our measures. We also have some qualitative dimensions (city, state, postal-code, region, category, sub-category). We want to find out how does the store fare when segmented by regions in the US. A category-wise and sub-category wise analysis to identify high ticket orders and margins across products.  
 
 Questions:
 
@@ -77,6 +77,12 @@ Outcomes:
 - In the Home Office segment: Particular months of the year consistently fared worse than with respect to the number of orders (Less than Average Orders). 
 
 **Dateset-2:** 
+This is a classic case of a relational database. We have 3 tables: matches, deliveries and players. 
+Matches Table: It offers a cursory glance or a match summary for every match played. Match-ID is the primary key. Teams battling out, match venue, toss-winner, POTM, umpires, match-winning team, toss-winner are the columns available. It is analogous to a lookup table.  
+Deliveries Table: Ball by ball statistics of every match played in an IPL season. The happenings on every ball are delineated as well. Runs scored (breakup by batsman runs, extra runs, etc.), wickets fell, mode of dismissal, batsman facing and bowler delivering a particular ball. Analogous to a fact table.  
+Players Table: Every player's trait (type of batting hand, nature of bowling) is outlined in this sheet. This sheet is also analogous to a lookup table. 
+
+Relationships: The matches and the deliveries tables could be related upon the Match ID column. The deliveries and the players tables could be related based upon batsman (or bowler) name and player name. Quite powerful statistics could be worked out based upon these relationships. 
 
 IPL 2017 Data: Before joining on any text based fields : be sure to trim the fields of any trailing and leading spaces. Establish proper relationships in the dataset. Check Datatype of Identified columns. Filter to 2017 matches using Data source filters. 
 
