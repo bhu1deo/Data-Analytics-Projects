@@ -78,6 +78,7 @@ Outcomes:
 
 **Dateset-2:** 
 This is a classic case of a relational database. We have 3 tables: matches, deliveries and players. 
+
 Matches Table: It offers a cursory glance or a match summary for every match played. Match-ID is the primary key. Teams battling out, match venue, toss-winner, POTM, umpires, match-winning team, toss-winner are the columns available. It is analogous to a lookup table.  
 Deliveries Table: Ball by ball statistics of every match played in an IPL season. The happenings on every ball are delineated as well. Runs scored (breakup by batsman runs, extra runs, etc.), wickets fell, mode of dismissal, batsman facing and bowler delivering a particular ball. Analogous to a fact table.  
 Players Table: Every player's trait (type of batting hand, nature of bowling) is outlined in this sheet. This sheet is also analogous to a lookup table. 
