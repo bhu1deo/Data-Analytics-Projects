@@ -1,4 +1,5 @@
-﻿Excel Pivot Tables Important Topics/Points: 
+The files outline some of my Experience working with Pivot Tables/Power Pivot and Power Query. 
+Excel Pivot Tables Important Topics/Points: 
 
 - Filters, Columns, Rows and Values
 - Pivot Table Analyze -> Add a new Calculated Field
