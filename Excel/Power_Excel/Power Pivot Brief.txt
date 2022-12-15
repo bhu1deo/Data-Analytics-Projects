@@ -1,0 +1,139 @@
+Load data 
+
+Link multiple tables
+
+Data model
+
+Calculations: Measures
+
+Pivot Table Pivot Charts KPIs
+
+Manage: Core Pivot Interface: Home Tab to import the data
+
+	Get data from all the related files in your database
+
+	Preview the data before adding to the data model, to check correctness
+
+	Before establishing relationships: take a note of the primary and foreign keys in the tables
+
+Establish relationships: Home tab -> Diagram View: Drag on related fields of different tables to establish relationships
+
+	One-Many relationship: Double click to manage the relationship, right click to see all options
+
+	After relationships have been established: we can go back to data view. 
+
+Calculated Columns in the Data View: Add column option is already present (greyed out)
+
+RELATED only works with RELATED tables
+
+Calculated Column for row wise calculations
+
+Measures for aggregate based calculations
+
+Save and close our data view: Then go to original Excel and then Select measures beside the Manage option
+
+Measures can also be added in the Calculation View of the Data View (After clicking Manage)
+
+It's better to add a measure in the power pivot window as all data is visible therein 
+
+New Measure definition: Measure_name:=Formula
+
+Unlike a calculated formula, while defining a measure do not start with an = sign
+Directly go for measure name and then := then followed by the formula
+
+Right click and then format, otherwise, we also have a formatting option in the Home Tab
+
+Explicit measures and better (aggregation specified explicitly), measures do not belong to any specific table
+
+Then go back to our original Excel interface and then Insert and then Insert a Pivot Table
+
+Insert Pivot Table from the Data model which we already have : generally we do it from a range or from a table
+
+All connected tables can be pulled into the Pivot Table 
+
+All the pivot table operations are valid henceforth 
+
+Measures can also be pulled into the values field of the pivot table 
+The aggregation then depends upon the row level filters applicable in the Pivot table under consideration
+Note that summarize values by cannot be changed for measures as they already have an aggregation inbuilt in them 
+
+KPIs: PResent in the Power Pivot Menu (by default when we are working with a Pivot Table, we are in the Pivot Table Menu)
+
+By default KPI values are presented as 0 and 1,-1: Remove and re-add the KPI values in order to see the colored KPI values 
+
+Get Data Transform and Shape and make it analysis ready
+
+See ETL png image
+
+more than million rows in Power Query
+
+powerful transformation tools
+
+all recorded steps can be run by just one click
+
+DAX: Data analysis expressions 
+
+Data tab: To get data from source: One can get data from existing range also
+
+M-code in the formula bar of the Power Query editor
+
+Name the Query appropriately
+
+Applied steps to check before finalizing
+
+Split Delimiter is a useful transformation 
+
+
+Specifying a column's data-type is different from formatting the values as currency
+
+Home Tab in the Power Query editor-> Close and load to apply the transformations and load the data
+
+
+Table design options are quite useful
+
+Editable applied steps have a gear icon: 
+
+Data Tab -> Queries and Connections : Right Click to refresh the Query (if new data added/steps changed)
+
+In the Query editor, the rows of the loaded data could be filtered as we do in normal Excel. 
+
+Headers should have the same name before merging the files: good practice
+
+Query Editor -> Home Tab replace values: 
+
+Unpivot cannot be done in Excel without Power Query
+
+Load into power query-> get data from range and then transform tab unpivot columns 
+
+Unpivot columns or sometimes unpivot columns other than the selected columns
+
+Merge Query: Similar to JOIN tables
+
+Append : Add rows Stack Rows
+
+Applied steps can be renamed by right click and rename
+
+using locale setting can be extremely helpful for changing to a date data type for a particular column
+sometimes dates are not recognized even after changing the data type of the particular column
+
+In the query editor, expand the pane on the left: Then we can see the Queries Tables 
+
+We can duplicate or reference queries
+
+duplicate: Duplicates 
+
+reference: Exact same query as the original one just do some changes at the end 
+
+Conditional Column, group by one or more columns 
+
+If you are looking to copy an entire query with all of its steps, then Duplicate is your friend.
+
+Reference is another way of copying a query, However, the big difference is that; 
+When you reference a query, the new query will have only one step: sourcing from the original query.
+ A referenced query, will not have the applied steps of the original query.	
+	
+	
+
+
+
+
