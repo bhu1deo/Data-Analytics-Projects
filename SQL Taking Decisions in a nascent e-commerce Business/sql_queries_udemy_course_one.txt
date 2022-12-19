@@ -1,0 +1,2297 @@
+SELECT * FROM employees
+WHERE department='Sports';  
+
+SELECT * FROM employees
+WHERE department like 'S%ort%';   
+-- WHERE clause AND OR condition checking here 
+
+SELECT * FROM employees 
+WHERE salary < 100000;     -- filter based on numeric column 
+
+SELECT * FROM employees 
+WHERE department < 'Music';  
+--we can filter based on character columns as well,  here the 
+--lexicographical order is followed in order to do comparisons. 
+
+SELECT * 
+FROM employees 
+WHERE 1=1;           -- true for all employees always true 
+
+SELECT *
+FROM employees
+WHERE 1<>1;          -- this is equivalent to NOT equal to Both Less than and Greater than so implements NOT EQUAL to 
+
+-- No entry satisfying the WHERE filter condition 
+SELECT * FROM employees 
+WHERE 1 !=1 OR salary>200000;
+
+SELECT * FROM employees 
+WHERE department='Sports' AND salary > 100000; 
+-- Multiple conditions : AND OR etc. 
+
+SELECT * 
+FROM employees 
+WHERE salary > 100000;
+
+-- Boolean expression 
+
+SELECT * 
+FROM employees 
+WHERE salary > 400000;
+
+-- multiple conditions here : 
+SELECT * 
+FROM employees 
+WHERE department = 'Clothing'
+AND salary > 100000;
+-- clothing and handsome salary 
+
+SELECT * 
+FROM employees 
+WHERE (department= 'Clothing'
+	  AND region_id = 2);         -- Looks better here 
+-- better to put in parenthesis for AND and OR 
+
+
+SELECT * 
+FROM employees 
+WHERE (department= 'Clothing'
+	  OR region_id = 2);
+
+SELECT * FROM employees 
+WHERE salary > 100000 AND (department='Clothing' OR department='Pharmacy'); 
+
+
+-- Following returns nothing : 
+SELECT * FROM employees WHERE department='Clothing' AND department='Sports'; 
+-- OR should be used above instead. 
+
+
+SELECT * 
+FROM employees
+WHERE salary < 100000
+OR (department='Tools' AND gender='F');
+
+
+SELECT * FROM employees WHERE NOT department='Clothing';
+SELECT * FROM employees WHERE department!='Clothing';
+-- Both work 
+-- every single record is checked against the record 
+-- and then it is returned if it satisfies the condition prescribed 
+
+-- NOT equals condition 
+
+SELECT * 
+FROM employees WHERE department != 'Sports';
+
+SELECT * 
+FROM employees WHERE NOT department = 'Sports';
+
+SELECT *
+FROM employees WHERE department > 'Sports';
+-- alphabetical comparison here 
+
+SELECT * 
+FROM employees 
+WHERE department <> 'Sports';
+-- equivalent to department not equalling sports here
+
+-- NULL never equals NULL :: NULL can never be compared 
+SELECT * FROM employees WHERE NULL = NULL; 
+SELECT * FROM employees WHERE NULL != NULL; 
+--NULL values here : 
+
+SELECT * 
+FROM employees 
+WHERE email IS NULL;         -- Use the IS operator in order to check NULL 
+
+-- the IS keyword is used for filtering based 
+-- on the NULL values here 
+
+-- IN operator  
+SELECT * 
+FROM employees 
+WHERE department IN ('Sports','Clothing');     -- checking for multiple values using the IN operator 
+
+
+-- BETWEEN operator : 
+
+SELECT * FROM employees 
+WHERE salary BETWEEN 80000 AND 100000; -- rather than using multiple conditions here 
+
+-- multiple value checking here 
+SELECT * 
+FROM employees 
+WHERE department IN ('Sports','First Aid','Random');
+
+-- ORDER BY 
+SELECT * FROM employees 
+ORDER BY employee_id desc;   -- largest to smallest 
+
+SELECT DISTINCT department as dept FROM employees; --renaming columns here 
+-- 27 departments in the employees columns 
+
+-- repeated departments : 
+SELECT department FROM employees; 
+SELECT DISTINCT department FROM employees;  
+-- in a given range 
+SELECT * 
+FROM employees 
+WHERE salary BETWEEN 100000 AND 125000;
+-- both values are inclusive in here 
+
+-- Excercises 
+-- Q1.) 
+
+SELECT first_name, email
+FROM employees 
+WHERE gender = 'F'
+AND department = 'Tools'
+AND salary > 110000;
+
+-- Q2.) 
+SELECT first_name, hire_date
+FROM employees 
+WHERE salary > 165000
+OR (department = 'Sports' AND gender = 'M');
+
+-- Q3.) 
+SELECT hire_date,first_name as name 
+FROM employees 
+WHERE hire_date BETWEEN '2002-01-01' AND '2005-03-04';
+
+
+
+-- Q4.) 
+SELECT * 
+FROM employees 
+WHERE (salary BETWEEN 40000 AND 100000
+AND department = 'Automotive' 
+AND gender = 'M')
+OR (gender = 'F' AND department = 'Toys');
+
+
+-- Sort based on a given column 
+SELECT * 
+FROM employees 
+ORDER BY employee_id asc;  -- ascending 
+
+SELECT * 
+FROM employees 
+ORDER BY employee_id desc;  -- descending 
+
+SELECT * 
+FROM employees 
+ORDER BY department desc;  -- descending 
+
+SELECT salary 
+FROM employees 
+ORDER BY salary desc;    -- salary highest to lowest 
+
+SELECT DISTINCT department
+FROM employees;   -- UNIQUE departments here 
+
+SELECT DISTINCT department 
+FROM employees 
+ORDER BY 1 
+LIMIT 10;
+
+SELECT department, first_name 
+FROM employees 
+ORDER BY 1    -- order by the department column which happens to be our first column 
+FETCH FIRST 10 ROWS ONLY;
+
+-- as is used to rename the columns change their names 
+SELECT first_name as "FIRST NAME" 
+FROM employees;
+
+
+-- Assignment 1 and Assignment 2 practice questions here : 
+
+
+create table students
+(
+	student_no integer,
+	student_name varchar(20),
+	age integer
+);
+
+insert into students values (1, 'Michael', 19);
+insert into students values (2, 'Doug', 18);
+insert into students values (3, 'Samantha', 21);
+insert into students values (4, 'Pete', 20);
+insert into students values (5, 'Ralph', 19);
+insert into students values (6, 'Arnold', 22);
+insert into students values (7, 'Michael', 19);
+insert into students values (8, 'Jack', 19);
+insert into students values (9, 'Rand', 17);
+insert into students values (10, 'Sylvia', 20);
+
+SELECT * 
+FROM students;
+
+
+create table courses
+(
+	course_no varchar(5),
+	course_title varchar(20),
+	credits integer
+);
+
+insert into courses values ('CS110', 'Pre Calculus', 4);
+insert into courses values ('CS180', 'Physics', 4);
+insert into courses values ('CS107', 'Intro to Psychology', 3);
+insert into courses values ('CS210', 'Art History', 3);
+insert into courses values ('CS220', 'US History', 3);
+
+create table student_enrollment
+(
+	student_no integer,
+	course_no varchar(5)
+);
+
+insert into student_enrollment values (1, 'CS110');
+insert into student_enrollment values (1, 'CS180');
+insert into student_enrollment values (1, 'CS210');
+insert into student_enrollment values (2, 'CS107');
+insert into student_enrollment values (2, 'CS220');
+insert into student_enrollment values (3, 'CS110');
+insert into student_enrollment values (3, 'CS180');
+insert into student_enrollment values (4, 'CS220');
+insert into student_enrollment values (5, 'CS110');
+insert into student_enrollment values (5, 'CS180');
+insert into student_enrollment values (5, 'CS210');
+insert into student_enrollment values (5, 'CS220');
+insert into student_enrollment values (6, 'CS110');
+insert into student_enrollment values (7, 'CS110');
+insert into student_enrollment values (7, 'CS210');
+
+
+create table professors
+(
+	last_name varchar(20),
+	department varchar(12),
+	salary integer,
+	hire_date date
+);
+
+insert into professors values ('Chong', 'Science', 88000, '2006-04-18');
+insert into professors values ('Brown', 'Math', 97000, '2002-08-22');
+insert into professors values ('Jones', 'History', 67000, '2009-11-17');
+insert into professors values ('Wilson', 'Astronomy', 110000, '2005-01-15');
+insert into professors values ('Miller', 'Agriculture', 82000, '2008-05-08');
+insert into professors values ('Williams', 'Law', 105000, '2001-06-05');
+
+create table teach
+(
+	last_name varchar(20),
+	course_no varchar(5)
+);
+
+insert into teach values ('Chong', 'CS180');
+insert into teach values ('Brown', 'CS110');
+insert into teach values ('Brown', 'CS180');
+insert into teach values ('Jones', 'CS210');
+insert into teach values ('Jones', 'CS220');
+insert into teach values ('Wilson', 'CS110');
+insert into teach values ('Wilson', 'CS180');
+insert into teach values ('Williams', 'CS107');
+
+
+-- The table has been created now some queries in here : 
+
+-- Q1.) Write a query to display the names of those students that are between the ages of 18 and 20.
+
+SELECT student_name as name 
+FROM students
+WHERE age BETWEEN 18 AND 20;
+
+-- Q2.) Write a query to display all of those students that contain the letters "ch" 
+-- in their name or their name ends with the letters "nd".
+
+SELECT *
+FROM students
+WHERE student_name LIKE '%ch%'
+OR student_name LIKE '%nd';
+
+-- Q3.) Write a query to display the name of those students that have the letters 
+-- "ae" or 
+-- "ph" in their name and are NOT 19 years old.
+
+SELECT * 
+FROM students 
+WHERE (student_name LIKE '%ae%'
+OR student_name LIKE '%ph%') 
+AND age!=19;
+
+-- Q4.) Write a query that lists the names of
+-- students sorted by 
+-- their age from largest to smallest.
+
+SELECT student_name 
+FROM students 
+ORDER BY age desc; 
+
+-- Write a query that displays the names and ages of 
+-- the top 4 oldest students.
+
+SELECT student_name,age
+FROM students
+ORDER BY age desc 
+LIMIT 4;
+
+--The student must not be older than age 20 if 
+--their student_no is either between 3 and 5 or 
+--their student_no is 7. Your query should also 
+--return students older than age 20 but in that case 
+-- they must
+--have a student_no that is at least 4.
+
+SELECT *
+FROM students
+WHERE (age<= 20 AND (student_no BETWEEN 3 AND 5 OR student_no=7))
+OR (age> 20 AND student_no>=4);
+
+-- The Assignment 2 is complete in here 
+
+-- Examples from Sections 3 and 4 here : 
+-- Formatting and Concatenating the data 
+-- for reporting purposes using functions and 
+-- boolean expressions 
+
+SELECT * 
+FROM employees;
+
+-- uppercase : function call here 
+-- inside goes argument here 
+SELECT UPPER(first_name), LOWER(last_name), department
+FROM employees; 
+
+-- not changing the actual data, just changing the 
+-- way the data is displayed to us
+
+SELECT LENGTH(first_name),first_name
+FROM employees;
+
+-- TRIM the text in here : test data 
+
+SELECT TRIM('  I   AM    BHUSHAN   ');
+-- extra spaces at the front and at the back
+-- are removed in here 
+
+-- composition of functions 
+SELECT LENGTH(TRIM(' I   am Bhushan '));
+-- note that TRIM doesn't remove the whitespaces 
+
+-- new columns from existing columns 
+SELECT * 
+FROM employees;
+
+
+-- pipes new columns here 
+SELECT first_name ||' ' || last_name as complete_name
+FROM employees;
+
+
+-- Boolean column in here 
+SELECT salary, (salary>100000) as boolcol
+FROM employees
+ORDER BY salary desc;
+
+-- note that the query below is different from the 
+-- query above : in the query below we order by 
+-- the boolean column whereas above we order by the 
+-- salary 
+
+SELECT salary, (salary>100000) as boolcol
+FROM employees
+ORDER BY boolcol desc; -- ordered by the boolean column here 
+
+-- BOOLEAN checking multiple conditions using IN 
+SELECT department, ('Clothing' in (department,first_name))
+FROM employees;
+
+SELECT ('Clothing' IN ('clothing','fashion','attire'));
+
+SELECT department, (department LIKE '%oth%')
+FROM employees;
+-- 1000 records as filtering is NOT being done here 
+
+
+-- STRING functions here : 
+
+SELECT 'Test Data here ' as test_data;
+
+-- extract parts of the string here : 
+-- SUBSTRING function here 
+SELECT SUBSTRING('Test Data here' FROM 1 FOR 4);
+-- position 1 4 characters 
+-- pull out some information from strings here 
+-- say domain name of an email address 
+
+
+SELECT SUBSTRING('Test Data here' FROM 6);
+
+-- replace 
+
+-- clothing --> attire 
+
+SELECT department, REPLACE(department,'Clothing','ATTIRE')
+FROM employees;
+-- children clothing is also changed to children attire 
+-- changing textual data 
+
+SELECT department || ' ' || 'department' as new_department
+FROM employees; 
+
+-- pipes concatenation here 
+
+-- email address domain name extraction here 
+
+SELECT POSITION('@' IN email)
+FROM employees; 
+-- NULL doesn't give you position 
+
+SELECT email,SUBSTRING(email,POSITION('@' IN email)+1) as domain_name 
+FROM employees; 
+
+--domain name of the email addresses here 
+
+-- NULL email addresses 
+-- display NA instead of [null]
+
+SELECT COALESCE(email,'NA') as EMAIL
+from employees; 
+
+-- Grouping functions : aggregated columns in SELECT query here 
+-- MIN MAX SUM AVG 
+
+SELECT *
+FROM employees;
+
+-- functions like UPPER LOWER REPLACE SUBSTRING : run 
+-- for every record and output equal number of rows 
+
+-- grouping functions return only single value instead 
+
+SELECT MAX(salary)
+FROM employees;
+-- MANY INPUTS, SCALER OUTPUT function 
+
+SELECT ROUND(AVG(salary))
+FROM employees;
+
+-- employee_id is the PRIMARY KEY check notes here 
+SELECT COUNT(employee_id)
+FROM employees;
+
+SELECT COUNT(email)
+FROM employees;  -- [null] values are not counted here 
+
+SELECT COUNT(*)
+FROM employees;
+
+SELECT SUM(*)
+FROM employees;
+-- this doesn't work as we want numeric data 
+
+SELECT SUM(salary)
+FROM employees;
+-- total salary paid by the company 
+
+SELECT SUM(salary)
+FROM employees
+WHERE department = 'Children Clothing';
+-- net salary paid by the Children Clothing 
+-- department here 
+
+-- Assisgnment 3 here : 
+-- the 
+SELECT *
+FROM professors; 
+
+SELECT last_name || ' works in the '|| department||' department'
+FROM professors;
+
+SELECT 'It is ' || (salary > 95000) ||
+
+' that professor ' || last_name || ' is highly paid'
+as "boolean statement"
+FROM professors;
+
+SELECT UPPER(SUBSTRING(department,1,3))
+FROM professors;
+
+SELECT MIN(salary), MAX(salary)
+FROM professors 
+WHERE last_name!='Wilson';
+
+SELECT *
+FROM professors
+ORDER BY hire_date asc
+LIMIT 1;
+
+-- this would give us the info of the professor 
+-- who joined first and his respective details also 
+
+
+-- GROUPING clause : 
+
+CREATE TABLE cars(make varchar(10)); 
+
+INSERT INTO cars VALUES('MARUTI');
+INSERT INTO cars VALUES('MARUTI');
+INSERT INTO cars VALUES('MARUTI');
+INSERT INTO cars VALUES('HYUNDAI');
+INSERT INTO cars VALUES('HYUNDAI');
+INSERT INTO cars VALUES('HONDA');
+INSERT INTO cars VALUES('HYUNDAI');
+INSERT INTO cars VALUES(NULL);
+
+SELECT *
+FROM cars; 
+
+SELECT COUNT(*)
+FROM cars;
+
+SELECT COUNT(*)
+FROM cars 
+GROUP BY make;
+-- grouped by different car makes here : 
+
+SELECT make, COUNT(*) 
+FROM cars 
+GROUP BY make;
+-- grouping intro up to here 
+
+
+-- GROUP BY and the HAVING clauses here : 
+
+-- total salary paid by each department : 
+SELECT department, SUM(salary) as tot
+FROM employees 
+WHERE region_id in (4,5,6,7)
+GROUP BY department
+ORDER BY tot; 
+
+
+SELECT department, COUNT(employee_id) as emp_count
+FROM employees
+GROUP BY department -- grouping by department here 
+ORDER BY emp_count;  -- sorted by the new column here 
+
+SELECT department, COUNT(*),ROUND(AVG(salary)) as avg_salary
+FROM employees
+GROUP BY department
+ORDER BY avg_salary ;   -- last thing here 
+-- filtering process can be done as an addendum here 
+
+
+-- Grouping by department : so gender cannot be a part of SELECT 
+-- Key rule :  If Group BY is used, you must specify that column 
+-- in the groupby if used in the SELECT statement 
+
+SELECT department, gender,COUNT(*) 
+FROM employees
+GROUP BY gender, department;
+
+
+-- Non Aggregate must be present in group by 
+-- if it is present in the select statement 
+
+-- this doesn't work, because the WHERE clause 
+-- is only used to filter NON-AGGREGATE columns 
+SELECT department, COUNT(*) as cnt
+FROM employees
+WHERE cnt < 35
+GROUP BY department;
+
+
+-- USE the HAVING clause if you wanna filter 
+-- AGGREGATE columns instead : 
+
+SELECT department, COUNT(*) as cnt
+FROM employees
+GROUP BY department
+HAVING COUNT(*) < 35; 
+-- Here cnt doesn't work because cnt is not yet a column 
+
+-- Some Excersises : 
+
+-- Q1.) Same first name in the 
+SELECT first_name, COUNT(*)
+FROM employees
+GROUP BY first_name
+HAVING COUNT(*)>1;
+-- HAVING to filter aggregated data here 
+
+-- Q2.) DISTINCT Keyword : 
+SELECT DISTINCT department 
+FROM employees; 
+
+SELECT department 
+FROM employees 
+GROUP BY department; 
+-- automatically duplicates are removed here 
+
+-- Q3.) Email domain names and their counts 
+
+SELECT SUBSTRING(email,POSITION('@' IN email )+1), COUNT(*) as cnt
+FROM employees
+WHERE email IS NOT NULL
+GROUP BY SUBSTRING(email,POSITION('@' IN email )+1)
+ORDER BY cnt desc; 
+-- Here it is VVIMP to note that we cannot group by 
+-- the email, because 2 different people have to have 
+-- different emails but definitely they can have 
+-- the same domain name ORDER BY at the END WHERE GROUP BY then 
+-- ORDER BY 
+
+-- Q4.) Last question 
+
+SELECT gender, region_id, ROUND(AVG(salary))
+FROM employees
+GROUP BY gender, region_id
+ORDER BY gender asc,region_id asc; 
+-- first order by the gender clause here 
+-- ORDER BY gender as well as region_id
+-- Non aggregated column if used in the SELECT 
+-- statement and also we are using a GROUP BY 
+-- then that column must be present in the GROUP BY 
+-- clause, it need not be used in the SELECT clause
+
+-- Assignment - 4 Practice Questions : 
+
+
+CREATE TABLE fruit_imports
+(
+	id integer,
+	name varchar(20),
+	season varchar(10),
+	state varchar(20),
+	supply integer,
+	cost_per_unit decimal
+);
+
+insert into fruit_imports values(1, 'Apple', 'All Year', 'Kansas', 32900, 0.22);
+insert into fruit_imports values(2, 'Avocado', 'All Year', 'Nebraska', 27000, 0.15);
+insert into fruit_imports values(3, 'Coconut', 'All Year', 'California', 15200, 0.75);
+insert into fruit_imports values(4, 'Orange', 'Winter', 'California', 17000, 0.22);
+insert into fruit_imports values(5, 'Pear', 'Winter', 'Iowa', 37250, 0.17);
+insert into fruit_imports values(6, 'Lime', 'Spring', 'Indiana', 40400, 0.15);
+insert into fruit_imports values(7, 'Mango', 'Spring', 'Texas', 13650, 0.60);
+insert into fruit_imports values(8, 'Orange', 'Spring', 'Iowa', 18000, 0.26);
+insert into fruit_imports values(9, 'Apricot', 'Spring', 'Indiana', 55000, 0.20);
+insert into fruit_imports values(10, 'Cherry', 'Summer', 'Texas', 62150, 0.02);
+insert into fruit_imports values(11, 'Cantaloupe', 'Summer', 'Texas', 8000, 0.49);
+insert into fruit_imports values(12, 'Apricot', 'Summer', 'Kansas', 14500, 0.20);
+insert into fruit_imports values(13, 'Mango', 'Summer', 'Texas', 17000, 0.68);
+insert into fruit_imports values(14, 'Pear', 'Fall', 'Nebraska', 30500, 0.12);
+insert into fruit_imports values(15, 'Grape', 'Fall', 'Illinois', 72500, 0.35);
+
+SELECT *
+FROM fruit_imports; 
+
+-- Q1.)Write a query that displays only the state with the largest amount of fruit supply.
+
+SELECT *
+FROM fruit_imports
+ORDER BY supply desc
+LIMIT 1; 
+-- this wont work because we are interested in the 
+-- total supply here 
+
+SELECT state, SUM(supply) as tot
+FROM fruit_imports
+GROUP BY state
+ORDER BY tot desc
+LIMIT 1;
+
+-- Here we had to count the total SUPPLY for a
+-- given state : and then sort in descending order 
+
+-- Q2.) Write a query that returns the most expensive 
+-- cost_per_unit of every season.  The query should display 2 columns,
+-- the season and the cost_per_unit
+
+SELECT season, MAX(cost_per_unit) as max_cost
+FROM fruit_imports
+GROUP BY season;
+
+-- Q3.) Write a query that returns the state that has more than 1 
+-- import of the same fruit.
+
+SELECT state,COUNT(name) as fruit_count
+FROM fruit_imports
+GROUP BY state
+HAVING COUNT(name)>1
+ORDER BY fruit_count;
+-- this is rather : states which import more than 
+-- one fruit 
+
+SELECT *
+FROM fruit_imports; 
+
+-- Q4.) Write a query that returns the 
+-- seasons that produce either 
+-- 3 fruits or 4 fruits.
+
+SELECT season, COUNT(name)
+FROM fruit_imports
+GROUP BY season
+HAVING COUNT(name)=3 OR COUNT(name)=4;
+
+-- Q5.) Write a query that takes into 
+-- consideration the supply and 
+-- cost_per_unit columns for determining the 
+-- total cost and returns 
+-- the most expensive state with the total cost.
+SELECT state,SUM(supply*cost_per_unit) as total_cost
+FROM fruit_imports
+GROUP BY state 
+ORDER BY total_cost desc
+LIMIT 1;
+
+-- SUM is VVI because there might be multiple fruits 
+-- for any given state 
+
+-- COALESCE : 
+
+CREATE table fruits (fruit_name varchar(10));
+INSERT INTO fruits VALUES ('Orange');
+INSERT INTO fruits VALUES ('Apple');
+INSERT INTO fruits VALUES (NULL);
+INSERT INTO fruits VALUES (NULL);
+
+SELECT *
+FROM fruits;
+
+SELECT COUNT(fruit_name) 
+FROM fruits;
+
+SELECT COUNT(COALESCE(fruit_name, 'SOMEVALUE'))
+FROM fruits;
+
+-- As NULL values get replaced by the COALESCE 
+-- function, the COUNT increases here 
+
+
+
+-- Aliasing 
+
+SELECT first_name,last_name,*
+FROM employees; 
+
+-- first name then last name and then the whole 
+-- table again is displayed here 
+
+-- multiple tables 
+SELECT e.department as emp_dept,d.department as dep_dept
+FROM employees e, departments d;
+-- giving aliases to those sources of the data here 
+-- Here we can clearly see that for every employee
+-- department we get all the department departments 
+
+-- Instead of aliases we can also use the Entire 
+-- table names here 
+
+-- Subqueries here : IN SELECT FROM WHERE
+
+-- Query within a Query 
+
+SELECT * FROM employees 
+WHERE department NOT IN (SELECT department FROM departments);
+-- the subquery acts as a source of data 
+-- the employees which work in departments 
+-- which DO NOT exist in the departments table 
+-- are shown here 
+
+SELECT source_data.employee_name 
+FROM (SELECT first_name as employee_name FROM employees WHERE salary>150000) as source_data;
+-- subquery in the FROM clause 
+-- the entire sub-table is displayed as it is here 
+-- outer query and the inner query should have the 
+-- same column names here 
+
+-- Aliasing helps when we have multiple sources 
+-- to have better readability and resolve ambiguity 
+-- Being specific always helps here 
+
+-- Now SUB-Query in the SELECT clause here : 
+
+-- The following doesn't work here : 
+SELECT first_name, (SELECT department FROM departments)
+FROM employees; 
+-- This is because when SUB-Query is present in the 
+-- SELECT clause then it should return a single 
+-- ROW as it is used as an expression 
+
+SELECT first_name, (SELECT department FROM departments LIMIT 1)
+FROM employees; 
+-- Same department is returned for every employee 
+-- since the whole table is returned by the query 
+-- and then we are limiting the records to 1 
+-- by LIMIT 1 
+
+-- sub-query can be used in SELECT WHERE FROM clauses 
+
+-- Problem : 
+
+-- List of employees followed by their department 
+-- and their division who work in the Electronics 
+-- Division 
+
+SELECT e.first_name||' '||e.last_name, e.department
+FROM employees as e
+WHERE e.department IN
+(SELECT department 
+FROM departments 
+WHERE division = 'Electronics'); 
+
+-- Here Subquery is used in the WHERE clause 
+
+-- Problem : Asia Canada 130000+ dollars
+SELECT * FROM employees
+WHERE salary > 130000 
+AND region_id in (SELECT region_id FROM regions 
+				 WHERE country IN ('Asia','Canada'));
+
+-- SUB-Query in the SELECT clause 
+-- how much less than the highest paid employee 
+-- in the company 
+-- The Query below would not work, this is because 
+-- the MAX(salary) is an aggregate column and the other 
+-- columns are non-aggregate columns 
+SELECT first_name,salary,MAX(salary)
+FROM employees; 
+
+-- this works : 
+SELECT emp.first_name,emp.salary, (SELECT MAX(salary) FROM employees) - emp.salary as less_salary 
+FROM employees as emp; 
+
+-- ANY and ALL operators here : 
+
+SELECT * FROM regions;
+
+SELECT * FROM employees
+WHERE region_id IN (SELECT region_id FROM regions WHERE country='United States');
+-- equality comparison using the IN clause 
+
+-- greater than all particular region_id : 
+
+SELECT * FROM employees
+WHERE region_id > ALL (SELECT region_id FROM regions WHERE country='United States');
+--562 here 
+-- greater than ANY of the values here 
+SELECT * FROM employees
+WHERE region_id > ANY (SELECT region_id FROM regions WHERE country='United States');
+-- 848 here 
+-- could be used in the WHERE as well as the 
+-- HAVING clause 
+
+-- Assignment Query : 
+
+-- Kids division hiring date>for maintenance dept
+SELECT *
+FROM employees 
+WHERE department = ANY (SELECT department FROM departments WHERE division ='Kids')
+AND hire_date > ALL (SELECT hire_date FROM employees WHERE department = 'Maintenance');
+-- 10 rows 
+
+-- Those salaries which occur most frequently 
+-- Mode in statistics here : and highest amongst those 
+
+SELECT salary FROM (
+SELECT salary, count(*) 
+FROM employees
+GROUP BY salary
+ORDER BY count(*) desc, salary desc
+LIMIT 1) as tab; 
+
+-- using the ALL keyword here : 
+
+SELECT salary 
+FROM employees 
+GROUP BY salary 
+HAVING count(*) >= ALL (SELECT count(*) FROM employees GROUP BY salary)
+ORDER BY salary desc
+LIMIT 1; 
+-- Note that we cannot use MAX here 
+-- as MAX is to be used on a column, Here we have 
+-- multiple rows returned here 
+DROP TABLE dupes;  
+
+CREATE TABLE dupes (id integer, name varchar(10));
+
+INSERT INTO dupes VALUES (1,'FRANK');
+INSERT INTO dupes VALUES (2,'FRANK');
+INSERT INTO dupes VALUES (3,'ROBERT');
+INSERT INTO dupes VALUES (4,'ROBERT');
+INSERT INTO dupes VALUES (5,'SAM');
+INSERT INTO dupes VALUES (6,'FRANK');
+INSERT INTO dupes VALUES (7,'PETER');
+-- semicolon should be inserted after 
+-- queries in order to execute multiple 
+-- query chunks 
+-- duplicate data table here -- pickup distinct 
+-- data here 
+
+SELECT * FROM dupes; 
+
+SELECT MIN(id) as ident, name
+FROM dupes 
+GROUP BY name
+ORDER BY ident;
+
+SELECT * 
+FROM dupes 
+WHERE id IN (SELECT MIN(id)
+FROM dupes 
+GROUP BY name);
+
+-- delete data : 
+DELETE FROM dupes 
+WHERE id IN (SELECT id FROM dupes);
+
+SELECT * FROM dupes;
+
+DROP TABLE dupes; 
+
+-- Outliers : Exclude the MIN and MAX in order to 
+-- compute the average here : 
+
+SELECT ROUND(AVG(salary))
+FROM employees
+WHERE salary NOT IN ((SELECT MIN(salary) FROM employees),(SELECT MAX(salary) FROM employees));
+-- exclude the extreme data points here 
+
+
+-- Assignment Problems here : 
+DROP TABLE students;
+create table students
+(
+	student_no integer,
+	student_name varchar(20),
+	age integer
+);
+
+insert into students values (1, 'Michael', 19);
+insert into students values (2, 'Doug', 18);
+insert into students values (3, 'Samantha', 21);
+insert into students values (4, 'Pete', 20);
+insert into students values (5, 'Ralph', 19);
+insert into students values (6, 'Arnold', 22);
+insert into students values (7, 'Michael', 19);
+insert into students values (8, 'Jack', 19);
+insert into students values (9, 'Rand', 17);
+insert into students values (10, 'Sylvia', 20);
+
+DROP TABLE courses;
+create table courses
+(
+	course_no varchar(5),
+	course_title varchar(20),
+	credits integer
+);
+
+insert into courses values ('CS110', 'Pre Calculus', 4);
+insert into courses values ('CS180', 'Physics', 4);
+insert into courses values ('CS107', 'Intro to Psychology', 3);
+insert into courses values ('CS210', 'Art History', 3);
+insert into courses values ('CS220', 'US History', 3);
+
+DROP TABLE student_enrollment; 
+create table student_enrollment
+(
+	student_no integer,
+	course_no varchar(5)
+);
+
+insert into student_enrollment values (1, 'CS110');
+insert into student_enrollment values (1, 'CS180');
+insert into student_enrollment values (1, 'CS210');
+insert into student_enrollment values (2, 'CS107');
+insert into student_enrollment values (2, 'CS220');
+insert into student_enrollment values (3, 'CS110');
+insert into student_enrollment values (3, 'CS180');
+insert into student_enrollment values (4, 'CS220');
+insert into student_enrollment values (5, 'CS110');
+insert into student_enrollment values (5, 'CS180');
+insert into student_enrollment values (5, 'CS210');
+insert into student_enrollment values (5, 'CS220');
+insert into student_enrollment values (6, 'CS110');
+insert into student_enrollment values (7, 'CS110');
+insert into student_enrollment values (7, 'CS210');
+
+DROP TABLE professors; 
+create table professors
+(
+	last_name varchar(20),
+	department varchar(12),
+	salary integer,
+	hire_date date
+);
+
+insert into professors values ('Chong', 'Science', 88000, '2006-04-18');
+insert into professors values ('Brown', 'Math', 97000, '2002-08-22');
+insert into professors values ('Jones', 'History', 67000, '2009-11-17');
+insert into professors values ('Wilson', 'Astronomy', 110000, '2005-01-15');
+insert into professors values ('Miller', 'Agriculture', 82000, '2008-05-08');
+insert into professors values ('Williams', 'Law', 105000, '2001-06-05');
+
+DROP TABLE teach;
+create table teach
+(
+	last_name varchar(20),
+	course_no varchar(5)
+);
+
+insert into teach values ('Chong', 'CS180');
+insert into teach values ('Brown', 'CS110');
+insert into teach values ('Brown', 'CS180');
+insert into teach values ('Jones', 'CS210');
+insert into teach values ('Jones', 'CS220');
+insert into teach values ('Wilson', 'CS110');
+insert into teach values ('Wilson', 'CS180');
+insert into teach values ('Williams', 'CS107');
+
+
+--students, courses, professors, student_enrollment
+
+--Is the students table directly related to 
+--the courses table? 
+--Why or why not?
+
+SELECT * FROM students; 
+
+SELECT * FROM courses; 
+
+--Using subqueries only, write a SQL statement that
+--returns the names of those students that are taking 
+--the courses Physics and US History.
+SELECT * FROM student_enrollment; 
+
+-- first get the course IDs here : 
+
+SELECT course_no 
+FROM courses 
+WHERE course_title IN ('Physics','US History');
+
+-- Then get the student IDs and then the names 
+
+
+SELECT student_name 
+FROM students 
+WHERE student_no IN 
+(SELECT student_no
+FROM student_enrollment
+WHERE course_no IN 
+(SELECT course_no 
+FROM courses 
+WHERE course_title IN ('Physics','US History')));
+
+
+-- Q3.) Using subqueries only, 
+-- write a query that returns the name of the student that 
+--is taking the highest number of courses. We will do it using the ALL operator here 
+SELECT student_name
+FROM students
+WHERE student_no IN (
+SELECT student_no
+FROM student_enrollment
+GROUP BY student_no
+ORDER BY COUNT(*) desc
+LIMIT 1); 
+-- this is instructor's solution here : 
+SELECT student_name FROM students WHERE student_no IN (     SELECT student_no FROM (         SELECT student_no, COUNT(course_no) course_cnt         FROM STUDENT_ENROLLMENT         GROUP BY student_no         ORDER BY course_cnt desc         LIMIT 1     )a );
+
+
+--Subqueries can be used in the FROM, WHERE, 
+--SELECT and even the HAVING clause.
+
+--Write a query to find the student that is 
+--the oldest. 
+--You are not allowed to use LIMIT or 
+--the ORDER BY clause to solve this problem.
+
+SELECT student_name
+FROM students
+WHERE age = (
+SELECT MAX(age)
+FROM students);
+
+SELECT * FROM students; 
+SELECT * FROM employees; 
+
+-- CASE clause lecture here : 
+
+SELECT * FROM employees; 
+
+-- add a new column here : 
+
+SELECT first_name,salary,
+CASE 
+	WHEN salary < 100000 THEN 'UnderPaid'
+	WHEN salary >= 100000 AND salary < 150000 THEN 'WellPaid'
+	ELSE 'VeryWellPaid'   -- very well paid here 
+	END as salary_status
+FROM employees
+ORDER BY salary DESC; 
+
+--conditional case expression here 
+
+-- total counts of people paid well, underpaid, verywellpaid
+SELECT salary_status,COUNT(*) FROM
+(SELECT first_name,salary,
+CASE 
+	WHEN salary < 100000 THEN 'UnderPaid'
+	WHEN salary >= 100000 AND salary < 150000 THEN 'WellPaid'
+	ELSE 'VeryWellPaid'   -- very well paid here 
+	END as salary_status
+FROM employees
+ORDER BY salary DESC) as sou
+GROUP BY sou.salary_status; 
+
+-- referencing always helps here 
+-- we used an uncorrelated subquery here
+-- later we would see correlated subqueries also
+
+SELECT salary_status,COUNT(*) FROM
+(SELECT first_name,salary,
+CASE 
+	WHEN salary < 100000 THEN 0
+	WHEN salary >= 100000 AND salary < 150000 THEN 1
+	ELSE 2   -- very well paid here 
+	END as salary_status
+FROM employees
+ORDER BY salary DESC) as sou
+GROUP BY sou.salary_status; 
+
+-- all strings or all integers here maybe all dates would also work here 
+
+-- transpose the above data here : 
+
+SELECT SUM (CASE WHEN e.salary< 100000 THEN 1 ELSE 0 END) as underpaid,
+SUM (CASE WHEN e.salary>=100000 AND e.salary<150000 THEN 1 ELSE 0 END) as wellpaid,
+SUM (CASE WHEN e.salary> 150000 THEN 1 ELSE 0 END) as verywellpaid
+FROM employees as e; 
+-- the END is important it goes after the ELSE 
+-- in the CASE statement here 
+-- we have transposed the data using sum and case statements 
+-- note that the output of case acts as a source for the sum here
+-- but it is not a subquery here 
+-- Here SUM function is summing all of the occurrences 
+-- The 0s are automatically irrelevant to the SUM here 
+
+-- CASE statement continued : Joins not now here 
+-- Transpose a dataset here : 
+SELECT SUM(CASE WHEN source_data.department='Sports' THEN source_data.cnt ELSE 0 END) as sports_employees,
+SUM(CASE WHEN source_data.department='Computers' THEN source_data.cnt ELSE 0 END) as computer_employees,
+SUM(CASE WHEN source_data.department='Clothing' THEN source_data.cnt ELSE 0 END) as clothing_employees, 
+SUM(CASE WHEN source_data.department='Tools' THEN source_data.cnt ELSE 0 END) as tools_employees
+FROM (SELECT department, count(*) as cnt
+FROM employees
+WHERE department IN ('Sports','Tools','Clothing','Computers')
+GROUP BY department
+ORDER BY count(*) asc)
+as source_data;  
+
+-- first get the non transposed data, then using 
+-- sum and the case statements we can get the 
+-- transposed data here : 
+-- here rather than using the subquery we could 
+-- have done as earlier using the whole dataset 
+-- itself
+
+
+-- another problem using the CASE clause here 
+
+SELECT first_name,region_id FROM employees; 
+
+SELECT region_id,country FROM regions;
+-- okay this is NOT correlated subquery after all here 
+SELECT first_name, (CASE WHEN region_id=1 THEN (SELECT country FROM regions as r WHERE r.region_id=1) ELSE NULL END) as region_1,
+(CASE WHEN region_id=2 THEN (SELECT country FROM regions as r WHERE r.region_id=2) ELSE NULL END) as region_2,
+(CASE WHEN region_id=3 THEN (SELECT country FROM regions as r WHERE r.region_id=3) ELSE NULL END) as region_3,
+(CASE WHEN region_id=4 THEN (SELECT country FROM regions as r WHERE r.region_id=4) ELSE NULL END) as region_4,
+(CASE WHEN region_id=5 THEN (SELECT country FROM regions as r WHERE r.region_id=5) ELSE NULL END) as region_5,
+(CASE WHEN region_id=6 THEN (SELECT country FROM regions as r WHERE r.region_id=6) ELSE NULL END) as region_6,
+(CASE WHEN region_id=7 THEN (SELECT country FROM regions as r WHERE r.region_id=7) ELSE NULL END) as region_7
+FROM employees as e
+ORDER BY first_name asc; 
+
+-- not hardcoded in here 
+
+-- joins join tables together based on common columns 
+
+-- 3 countries and then the counts of employees
+-- which come from these 3 countries 
+SELECT region_id,country FROM regions;
+-- okay this is NOT correlated subquery after all here 
+SELECT COUNT(sour.region_1)+COUNT(sour.region_2)+COUNT(sour.region_3) as United_states,
+COUNT(sour.region_4)+COUNT(sour.region_5) as Asia,
+COUNT(sour.region_6)+COUNT(sour.region_7) as Canada 
+FROM (
+SELECT first_name, (CASE WHEN region_id=1 THEN (SELECT country FROM regions as r WHERE r.region_id=1) ELSE NULL END) as region_1,
+(CASE WHEN region_id=2 THEN (SELECT country FROM regions as r WHERE r.region_id=2) ELSE NULL END) as region_2,
+(CASE WHEN region_id=3 THEN (SELECT country FROM regions as r WHERE r.region_id=3) ELSE NULL END) as region_3,
+(CASE WHEN region_id=4 THEN (SELECT country FROM regions as r WHERE r.region_id=4) ELSE NULL END) as region_4,
+(CASE WHEN region_id=5 THEN (SELECT country FROM regions as r WHERE r.region_id=5) ELSE NULL END) as region_5,
+(CASE WHEN region_id=6 THEN (SELECT country FROM regions as r WHERE r.region_id=6) ELSE NULL END) as region_6,
+(CASE WHEN region_id=7 THEN (SELECT country FROM regions as r WHERE r.region_id=7) ELSE NULL END) as region_7
+FROM employees as e
+ORDER BY first_name asc) as sour;  
+
+-- transposed columns here 
+
+-- assignment-6 fruit_imports table here : 
+
+SELECT * FROM fruit_imports; 
+
+--Write a query that displays 3 columns. 
+--The query should display the fruit and it's 
+--total supply along with a category of either 
+--LOW, ENOUGH or FULL. Low category means that 
+--the total supply of the fruit is less than 
+--20,000. The enough category means that the 
+--total supply is between 20,000 and 50,000. 
+--If the total supply is greater than 50,000 
+--then that fruit falls in the full category.
+
+-- displaying in the same column here : 
+SELECT name, (CASE WHEN supply_sum<20000 THEN 'LOW' WHEN supply_sum>50000 THEN 'FULL' ELSE 'ENOUGH' END) as capacity
+FROM (SELECT name, SUM(supply) as supply_sum
+FROM fruit_imports
+GROUP BY name)
+as source_data; 
+-- of course we could pick 3 columns from here 
+-- and add NULL wherever we DO NOT require anything 
+-- displaying in different columns using case here : 
+
+--Taking into consideration the supply column 
+--and the cost_per_unit column, you should be 
+--able to tabulate the total cost to import 
+--fruits by each season.
+--The result will look something like this:
+SELECT SUM(CASE WHEN source_data.season='Winter' THEN source_data.cost_import ELSE 0 END) as Winter_Import, 
+SUM(CASE WHEN source_data.season='Winter' THEN source_data.cost_import ELSE 0 END) as Summer,
+SUM(CASE WHEN source_data.season='All Year' THEN source_data.cost_import ELSE 0 END) as All_Year,
+SUM(CASE WHEN source_data.season='Spring' THEN source_data.cost_import ELSE 0 END) as Spring,
+SUM(CASE WHEN source_data.season='Fall' THEN source_data.cost_import ELSE 0 END) as Fall
+FROM 
+(SELECT season, SUM(supply*cost_per_unit) as cost_import
+ FROM fruit_imports
+GROUP BY season) as source_data;
+ 
+ 
+-- correlated subqueries here : 
+
+SELECT first_name,salary
+FROM employees 
+WHERE salary > (SELECT ROUND(AVG(salary)) FROM employees); 
+
+
+-- this is an example of an uncorrelated subquery 
+
+-- we see what is a correlated subquery here: 
+-- avg departmental salary now : 
+
+SELECT e1.first_name, e1.salary, e1.department,
+(SELECT ROUND(AVG(salary)) FROM employees as e2 WHERE e1.department=e2.department) as avg_dept_salary
+FROM employees e1
+WHERE salary > (SELECT ROUND(AVG(salary)) FROM employees as e2 WHERE e1.department=e2.department)
+-- here we are thresholding based on the departmental 
+-- average instead of the total average of all the employees 
+-- inner query runs for every single record of the outer query here 
+-- correlated on the department here 
+-- SLOW because it runs for every single record 
+-- for the outer query 
+
+-- inner query uses info of the outer query particular 
+-- record here 
+
+-- query to obtain names of departments more than 38 
+-- employees working : 
+SELECT department, COUNT(*) as cnt
+FROM employees
+ GROUP BY department
+ HAVING COUNT(*)>= 38
+ ORDER BY COUNT(*) ASC;
+
+-- now using correlated subqueries here 
+
+SELECT d.department,
+(SELECT COUNT(*) FROM employees as e
+			WHERE e.department=d.department GROUP BY e.department) as cnt
+FROM departments as d 
+WHERE 38 <= (SELECT COUNT(*) FROM employees as e
+			WHERE e.department=d.department GROUP BY e.department);
+-- for every record of the outer query the subquery runs here
+-- for this problem correlated subquerying makes it complicated 
+
+-- better to use the departments table instead 
+-- of the employee table as it is less time 
+-- consuming 
+
+-- now the highest paid employee's salary 
+-- for each one of these departments here 
+SELECT d.department, (SELECT MAX(salary) FROM employees as e2 WHERE e2.department=d.department)
+FROM departments as d 
+WHERE 38 <= (SELECT COUNT(*) FROM employees as e
+			WHERE e.department=d.department GROUP BY e.department); 
+-- only 38 employees here 
+-- GROUP BY IS NOT REALLY REQUIRED IN THE FIRST CORRELATED SUBQUERY HERE 
+-- this works because GROUP BY executes before the 
+-- WHERE conditional clause here 
+(SELECT d.department, (SELECT MAX(salary) FROM employees as e2 WHERE e2.department=d.department)
+FROM departments as d 
+WHERE 38 < (SELECT COUNT(*) FROM employees as e
+			WHERE e.department=d.department GROUP BY e.department)) 
+EXCEPT
+(SELECT department, MAX(salary)
+FROM employees
+GROUP BY department
+HAVING COUNT(*)>38); 
+
+-- the 2 queries return the same here 
+-- good 
+
+-- correlated subquery exercise : 
+
+
+
+-- Introducing table Joins : 
+
+-- for every department in the employees table 
+-- we should see the highest salaried employee
+-- and the lowest salaried employee
+-- and his salary also needs to be displayed here 
+
+
+(SELECT e2.department as dept,
+ e2.first_name,
+ e2.salary as sal,
+ (CASE WHEN salary = (SELECT MAX(salary)
+FROM employees e1 
+WHERE e1.department = e2.department) THEN 'HIGH SALARY' ELSE 'LOW SALARY' END)
+FROM employees as e2
+WHERE salary = (SELECT MAX(salary)
+FROM employees e1 
+WHERE e1.department = e2.department) OR
+salary = (SELECT MIN(salary)
+FROM employees e1 
+WHERE e1.department = e2.department)
+ORDER BY e2.department);  
+
+-- non groupby with group by is difficult here 
+-- select those salaries which we want 
+-- minimum and maximum salaries departwise here 
+-- note that here we do not use group by 
+-- because then we get only one instance of the 
+-- department here 
+-- else we have to use joins and unions if we wanna 
+-- use the group by command here 
+-- no condition on the first name here 
+-- as we are not grouping by anything here 
+-- correlated subquery runs for every record 
+-- of the outer query here 
+
+-- Joins and join on a common column here : 
+-- multiple tables across a common column here : 
+
+SELECT * 
+FROM employees, regions; 
+-- not joined on a common column here 
+-- hence we should link based on a common 
+-- column here 
+SELECT e.first_name,r.country
+FROM employees as e, regions as r
+WHERE e.region_id = r.region_id; 
+-- JOIN based on a common column here 
+
+-- first name :: email :: division and also the country 
+-- non NULL email addresses here : 
+
+SELECT * FROM departments; 
+
+SELECT first_name, email,r.country,d.department
+FROM employees as e, regions as r, departments as d
+WHERE email is NOT NULL 
+AND
+(e.region_id = r.region_id)
+AND
+(d.department = e.department);
+
+-- Multiple Table Join here : multiple conditions here 
+-- condition present in the WHERE clause here 
+-- alias referencing is best practice here 
+
+-- country and the total number of employees 
+-- belonging to that country here : 
+
+SELECT r.country,COUNT(e.employee_id) 
+FROM employees as e, regions as r 
+WHERE r.region_id = e.region_id -- common column here 
+GROUP BY r.country;  
+
+SELECT COUNT(*) FROM ( 
+SELECT r.country 
+FROM employees as e, regions as r) as s;
+-- 7000 records think!!!
+
+-- this query is very interesting 
+-- for each query record r.country
+-- it generates all the records 100 per different country 
+
+
+SELECT * 
+FROM employees as e, regions as r 
+-- WHERE r.region_id = e.region_id -- common column here 
+-- 7000 rows here 
+
+SELECT * FROM regions; 
+
+-- note that we could join as the region_id 
+-- column is non-ambiguous, it's unique here 
+
+SELECT * FROM employees;
+
+SELECT * FROM employees, regions; 
+
+SELECT * FROM regions, employees;
+-- notice and understand the difference above here 
+
+
+SELECT first_name, country
+FROM employees INNER JOIN regions
+ON employees.region_id = regions.region_id;
+-- 1000 records as above here 
+
+SELECT first_name, email, division, country 
+FROM employees INNER JOIN departments
+ON employees.department = departments.department
+INNER JOIN regions ON employees.region_id = regions.region_id 
+WHERE email is NOT NULL;
+-- joining with both of these tables here 
+-- put it in the ON clause instead here 
+
+-- INNER JOIN AND ON here 
+-- Let's say we have departments in the departments
+-- table which are not present in the employees 
+-- table and vice versa
+
+SELECT DISTINCT department FROM employees; 
+
+SELECT department FROM departments; 
+
+-- some departments are absent and vice versa 
+
+-- LEFT JOIN 
+SELECT DISTINCT e.department,d.department
+FROM employees as e INNER JOIN departments as d
+ON e.department = d.department; 
+-- only 23 matching here 
+
+SELECT DISTINCT e.department,d.department
+FROM employees as e LEFT JOIN departments as d
+ON e.department = d.department;
+-- 27 here all the departments in the left table 
+-- regardless or not they exist in the departments 
+-- table here 
+
+SELECT DISTINCT e.department,d.department
+FROM employees as e RIGHT JOIN departments as d
+ON e.department = d.department;
+-- Camping & Fishing is absent in employees table 
+-- Give Preference to the RIGHT table here 
+
+
+-- stacking data here : 
+
+SELECT DISTINCT department 
+FROM employees;
+
+SELECT department
+FROM departments; 
+
+
+-- union removes duplicates here : 
+SELECT DISTINCT department 
+FROM employees
+UNION
+SELECT department
+FROM departments;  
+-- just blind stacking using union all here :
+-- doesn't eliminate the duplicates here 
+SELECT DISTINCT department 
+FROM employees
+UNION ALL
+SELECT department
+FROM departments; 
+-- 27+24 = 51 here : 
+-- the number of columns and the data types 
+-- should match for union and union all here 
+-- ofcourse the machine is not that 
+-- intelligent to also match same info. column 
+SELECT DISTINCT department 
+FROM employees
+ORDER BY department 
+UNION ALL
+SELECT department
+FROM departments
+ORDER BY department; 
+-- above query throws an error, as it is a composite 
+-- query here 
+SELECT DISTINCT department 
+FROM employees
+UNION ALL
+SELECT department
+FROM departments
+ORDER BY department; 
+-- this works here see output and then think 
+
+-- EXCEPT : 
+-- to see outputs of similar queries 
+-- if same then the queries to the same thing 
+
+SELECT DISTINCT department 
+FROM employees
+EXCEPT
+SELECT DISTINCT department 
+FROM departments;
+
+SELECT DISTINCT department 
+FROM departments
+EXCEPT
+SELECT DISTINCT department 
+FROM employees;
+-- oracle uses - instead of EXCEPT 
+
+-- department wise count of employees
+-- and also the total do union all maybe? 
+SELECT department, COUNT(*)
+FROM employees
+GROUP BY department
+UNION ALL
+SELECT 'Total',COUNT(*)
+FROM employees;
+-- we have joined the two tables using union all
+-- order by impossible before the union all 
+
+-- cartesian product : 
+-- M and N length array then MN elements in the 
+-- cartesian product 
+
+SELECT COUNT(*) FROM 
+(
+SELECT * FROM departments,employees 
+) as source_data; 
+
+-- all possible combinations here 
+
+SELECT * FROM employees as e1,employees as e2; 
+-- 1 million records returned here 
+
+-- note that above we did not create a join 
+
+SELECT * FROM employees as e1 CROSS JOIN 
+departments as d;
+-- cross join is cartesian product 
+
+-- f_n,dept,h_d,country of first and last employee 
+
+(SELECT * FROM employees
+ORDER BY hire_date DESC
+LIMIT 1)
+UNION ALL -- as we are limiting here 
+(SELECT * FROM employees
+ORDER BY hire_date ASC
+LIMIT 1);
+-- notice the brackets here 
+
+-- let's try to do it without joins here : 
+
+SELECT * FROM employees
+WHERE hire_date = (SELECT MIN(hire_date)
+				   FROM employees)
+OR hire_date = (SELECT MAX(hire_date)
+				   FROM employees);
+-- but here how to limit to 1 employee?? 
+
+-- the country information could be obtained 
+-- based on the inner join on the employees 
+-- and the regions tables based on the region id 
+-- notice the paranthesis 
+
+
+-- salary budget for every 90 days : 
+-- using correlated subquery : 
+-- date arithmetic here :: 
+
+SELECT first_name, hire_date, hire_date-90
+FROM employees; 
+
+-- use a correlated subquery in order to get the 
+-- previous 90 day salary budget here 
+
+SELECT e.hire_date,e.hire_date-90,
+(SELECT SUM(e2.salary) FROM employees e2 WHERE e2.hire_date
+BETWEEN e.hire_date-90 AND e.hire_date)
+FROm employees as e
+ORDER BY hire_date; 
+-- outer record dependent correlated subquery here : 
+-- smaller ahead of the larger here 
+-- moving sum here 
+
+-- Views : Virtual table 
+-- cannot insert/delete data in a view 
+
+-- let's first see two different methods of joining 
+-- and then check the results here 
+
+SELECT first_name, email, e.department, salary,
+d.division, r.region, country 
+FROM employees as e, departments as d, regions as r 
+WHERE e.department = d.department
+AND e.region_id = r.region_id 
+EXCEPT
+SELECT first_name, email, e.department, salary,
+d.division, r.region, country
+FROM employees as e INNER JOIN departments as d
+ON e.department = d.department INNER JOIN 
+regions as r ON e.region_id = r.region_id;
+
+-- great we checked the two join formulations are 
+-- giving us the same result here 
+
+
+-- now views : 
+CREATE VIEW v_emp_info as 
+SELECT first_name, email, e.department, salary,
+d.division, r.region, country 
+FROM employees as e, departments as d, regions as r 
+WHERE e.department = d.department
+AND e.region_id = r.region_id;
+-- view is created in schemas and then views 
+
+SELECT * FROM v_emp_info; 
+-- can join and all
+-- but cannot insert/delete data from the view
+
+-- inline view : 
+SELECT * FROM (SELECT * FROM departments) as s;
+
+
+SELECT * FROM teach; 
+
+--Are the tables student_enrollment and
+--professors directly related to each other? 
+--Why or why not?
+
+SELECT * FROM student_enrollment; 
+SELECT * FROM professors; 
+-- not related as no common column exists between them here :
+
+
+--Write a query that shows the student's name, 
+--the courses the student 
+--is taking and the professors that teach that course.
+
+SELECT * FROM students; 
+SELECT * FROM student_enrollment; 
+SELECT * FROM courses; 
+SELECT * FROM professors;
+SELECT * FROM teach; -- last_name and course_no
+
+SELECT s.student_name,courses.course_no,teach.last_name
+FROM students as s INNER JOIN student_enrollment as st ON 
+s.student_no = st.student_no
+INNER JOIN courses ON st.course_no=courses.course_no
+INNER JOIN teach ON teach.course_no=st.course_no
+ORDER BY s.student_name
+EXCEPT
+SELECT student_name, se.course_no, p.last_name
+FROM students s
+INNER JOIN student_enrollment se
+    ON s.student_no = se.student_no
+INNER JOIN teach t
+    ON se.course_no = t.course_no
+INNER JOIN professors p
+    ON t.last_name = p.last_name
+ORDER BY student_name;
+
+-- okay the upper solution is our solution and the lower 
+-- solution is instructors solution 
+-- we have seen that no difference using except here 
+
+--The combination of student_name and course_no is being 
+--repeated for as many professors that are teaching that 
+--particular course. If you ORDER BY the student_name 
+--column, you'll clearly be able to see that multiple 
+--professors are teaching the same subject. 
+--For example, course CS110 is being taught by both 
+--Brown and Wilson. 
+--That is why you'll see the combination of
+--the student Arnold with CS110 twice. 
+--Analyze the data and understand what's going 
+--on because in the next question you'll need to 
+--write a query to be eliminate this redundancy.
+
+--In question 3 you discovered why there is 
+--repeating data. How can we eliminate this redundancy?
+--Let's say we only care to see a single professor 
+--teaching a course and we don't care for all the 
+--other professors that teach the particular course. 
+--Write a query that
+--will accomplish this so that every record is distinct.
+-- the use of distinct won't work here 
+-- this is because we have non-repeated 3-tuples 
+
+
+(SELECT student_name, se.course_no, t.last_name
+FROM students s
+INNER JOIN student_enrollment se
+    ON s.student_no = se.student_no
+INNER JOIN (SELECT t.course_no,
+MIN(t2.last_name) as last_name
+FROM teach as t2,
+(SELECT DISTINCT course_no from teach) as t
+WHERE t.course_no=t2.course_no
+GROUP BY t.course_no) as t
+    ON se.course_no = t.course_no
+ORDER BY student_name)
+
+EXCEPT
+
+SELECT student_name, course_no, min(last_name)
+FROM (
+SELECT student_name, se.course_no, p.last_name
+FROM students s
+INNER JOIN student_enrollment se
+    ON s.student_no = se.student_no
+INNER JOIN teach t
+    ON se.course_no = t.course_no
+INNER JOIN professors p
+    ON t.last_name = p.last_name
+    ) a
+    GROUP BY student_name, course_no
+    ORDER BY student_name, course_no;
+-- good the instructor's solution and my solution matches 
+
+-- the teach table is a bit of a problem here 
+SELECT t.course_no,
+MIN(t2.last_name)
+FROM teach as t2,
+(SELECT DISTINCT course_no from teach) as t
+WHERE t.course_no=t2.course_no
+GROUP BY t.course_no; 
+-- the above query was the CRUX of the problem
+-- we can also see the instructor's solution later
+
+
+--In the video lectures, we've been discussing the
+--employees table and the departments table. 
+--Considering those tables, write a query that 
+--returns employees whose
+--salary is above average for their given department.
+
+SELECT *
+FROM employees as e
+WHERE salary > (SELECT AVG(salary) FROM employees 
+			   as e2 WHERE e2.department=e.department);
+
+
+--Write a query that returns ALL of the students as well 
+--as any courses they may or may not be taking.
+
+SELECT s.student_no, student_name, course_no
+FROM students s LEFT JOIN student_enrollment se
+ON s.student_no = se.student_no
+-- it is important to see that some students 
+-- may not take some of the courses 
+-- so LEFT JOIN is very important here 
+-- as it would print all of the students 
+
+SELECT * FROM employees; 
+
+-- first name department and the number 
+-- of employees working in that department 
+
+SELECT e.first_name,e.department,
+(SELECT COUNT(*) FROM employees as e2
+WHERE e2.department = e.department)
+FROM employees as e;
+
+-- but this is correlated subquery here 
+-- this will run very slow 
+-- note that here we are not grouping by the 
+-- first name, hence we get 1000 records 
+-- if we had grouped by the first name column also 
+-- then we would have 999 records 
+-- as some of the first names are repeated 
+
+
+-- with using the windowing partition function here : 
+SELECT first_name,department,
+COUNT(*) OVER()
+FROM employees e2;
+-- 1000 employees 
+-- we are not grouping by department here 
+
+
+SELECT first_name,department,
+COUNT(*) OVER(PARTITION BY department)
+FROM employees e2
+EXCEPT
+SELECT e.first_name,e.department,
+(SELECT COUNT(*) FROM employees as e2
+WHERE e2.department = e.department)
+FROM employees as e;
+
+-- identical query here 
+SELECT first_name,department,
+SUM(salary) OVER(PARTITION BY department)
+FROM employees e2;
+-- departmentwise sum of salaries here 
+SELECT first_name,department,
+SUM(salary) OVER()
+FROM employees e2;
+-- total sum of salaries here 
+
+
+SELECT first_name, department,region_id,
+COUNT(*) OVER(PARTITION BY department) as dept_count,
+COUNT(*) OVER(PARTITION BY region_id) as reg_count
+FROM employees e2;
+-- very useful to combine non-aggregate column 
+-- with aggregate columns here 
+
+SELECT first_name, department, COUNT(*) OVER()
+FROM employees
+WHERE region_id=3; 
+-- windowing function runs towards the end here
+-- from -> where -> then the window function runs 
+SELECT first_name, department,
+COUNT(*) OVER(PARTITION BY department)
+FROM employees
+WHERE region_id=3;
+-- very useful to form a combination of 
+-- aggregate and non-aggregate columns 
+
+
+-- running total : 
+SELECT first_name, hire_date, department, salary,
+SUM(salary) OVER (PARTITION BY department ORDER BY hire_date RANGE BETWEEN 
+				 UNBOUNDED PRECEDING AND CURRENT ROW) as running_total
+FROM employees
+ORDER BY hire_date; 
+-- running total order by in the window 
+-- function here 
+-- basically inside the OVER clause 
+-- we give the program a way to compute the 
+-- window frame and here we are ordering based 
+-- on the date and then considering the whole 
+-- preceding unbounded frame at once
+
+-- adding the adjacent salaries here : 
+
+
+SELECT first_name, hire_date, department, salary,
+SUM(salary) OVER(ORDER BY hire_date ROWS BETWEEN 1 
+				PRECEDING AND CURRENT ROW)
+FROM employees;
+
+SELECT first_name, hire_date, department, salary,
+SUM(salary) OVER(ORDER BY hire_date ROWS BETWEEN 1000 
+				PRECEDING AND CURRENT ROW)
+FROM employees;
+-- all preceeding rows here 
+-- partition by would then partition by the 
+-- department and then we would have department
+-- wise values here 
+
+
+-- RANK, FIRST_VALUE, NTILE functions : 
+SELECT * FROM 
+(SELECT first_name, email, department, salary,
+RANK() OVER(PARTITION BY department ORDER BY salary DESC) as rank_col
+FROM employees) as s
+where rank_col = 8; 
+-- the rank column is generated at the end of the query
+-- hence we must use a subquery for it when using the where 
+-- clause 
+-- if we are using the columns created during the run of the 
+-- program then better to use a subquery 
+-- as a source of data rather than using the on the fly generated 
+-- column here 
+
+-- buckets of rows here : 
+
+SELECT first_name, email, department, salary,
+NTILE(5) OVER(PARTITION BY department ORDER BY salary DESC) as salary_bracket
+FROM employees;
+
+SELECT first_name, email, department, salary,
+FIRST_VALUE(salary) OVER(PARTITION BY department ORDER BY salary DESC) as salary_bracket
+FROM employees
+EXCEPT
+SELECT first_name, email, department, salary,
+MAX(salary) OVER(PARTITION BY department ORDER BY salary DESC) as salary_bracket
+FROM employees;
+
+-- similarly NTH value exists 
+
+
+
+-- Re-vision 
+
+SELECT TRIM('      HELLO      BHUSHAN'); 
+-- left spaces are trimmed. 
+SELECT LENGTH('            HELLO      BHUSHAN');
+-- length function takes into account the spaces present in the string 
+
+SELECT first_name || ' '|| last_name as name_emp FROM employees; 
+-- column is renamed and aliased as something else 
+-- new cols from existing columns. 
+
+-- Boolean concatenation 
+SELECT first_name || last_name, (salary>100000)
+FROM employees; 
+-- true values at the top 
+SELECT first_name || last_name, (salary>100000) as sal_judge
+FROM employees
+ORDER BY sal_judge desc;
+-- here order by salary could also have worked 
+
+SELECT ('Clothing' IN (department)) as cloth_dept  -- this is a boolean column in here 
+FROM employees; 
+
+SELECT department, (department LIKE '%oth%')        -- string is matched only partially here 
+FROM employees;                -- Again Boolean Column meant for the filtering of the Clothing department 
+
+SELECT SUBSTRING('This is hilarious' FROM 3 FOR 4);
+-- SUBSTRING(STRING FROM 1 FOR 4), start from the first character and go on 4 characters in length ahead. 
+-- extracting substring out of a complete string 
+
+SELECT department,REPLACE(department,'Clothing','Attire') as replaced_column
+FROM employees; 
+-- even children clothing is replaced by children attire here. the Clothing columnn is of course replaced. 
+
+SELECT REPLACE('This is our original string','original','hello');
+
+
+SELECT email,SUBSTRING(email FROM POSITION('@' IN email)+1)
+FROM employees;              -- +1 is added to remove the display of the @ sign 
+
+SELECT email,COALESCE(email,'NONE')
+FROM employees;
+
+SELECT email FROM employees 
+WHERE email IS NOT NULL;        -- IS NOT NULL is used to compare NULL values 
+
+-- grouping functions 
+
+SELECT MAX(salary)
+FROM employees; -- many to one function here 
+
+SELECT ROUND(salary)
+FROM employees;
+
+SELECT COUNT(employee_id) FROM employees;
+-- count is generally used for primary key based columns which have distinct entries 
+-- (non repeated entries)
+
+SELECT SUM(salary) FROM employees;
+
+SELECT SUM(salary) as toys_total_salary
+FROM employees 
+WHERE department='Toys';
+
+
+SELECT COUNT(region_id) FROM employees; 
+
+
+SELECT COUNT(DISTINCT region_id) FROM employees;
+
+SELECT COUNT(employee_id)       -- any non-NuLL containing column would do here  
+FROM employees 
+GROUP BY region_id; 
+
+SELECT email
+FROM employees 
+WHERE email IS NULL
+GROUP BY email;         -- The NULL group also reflects after group by 
+
+
+SELECT SUM(salary)        -- either grouped by column or an aggregate column : logical 
+FROM employees 
+WHERE region_id IN (4,5,6,7)         -- sum salaries only in these regions 
+GROUP BY department;  
+
+SELECT department,COUNT(employee_id) as count_emp
+FROM employees 
+GROUP BY department
+ORDER BY count_emp
+LIMIT 5; 
+
+
+SELECT department, COUNT(employee_id) as total_employees, 
+MAX(salary),MIN(salary),ROUND(AVG(salary)) as avg
+FROM employees
+WHERE salary > 100000            -- notice the change in Max and Min; also notice the bumping up of the average salary 
+GROUP BY department
+ORDER BY total_employees; 
+
+SELECT department, COUNT(employee_id) 
+FROM employees 
+
+GROUP BY department
+HAVING COUNT(employee_id)>40; 
+
+
+
+-- aliasing, here we have multiple sources of data  
+SELECT e.department FROM employees as e,departments as d;
+SELECT department FROM employees; 
+-- Note that the first query returned 24000 rows, whereas the second query returned 1000 rows. 
+
+
+
+-- Subquery 
+
+SELECT first_name,department FROM employees 
+WHERE department NOT IN (SELECT department FROM departments);
+
+
+-- new column names : 
+
+SELECT e.emp_name,e.salary FROM (SELECT first_name as emp_name,salary FROM employees) as e; 
+-- notice the new column names and the alias provided to the subquery used in the FROM clause 
+
+
+
+SELECT first_name, (SELECT first_name FROM employees LIMIT 1)    -- LIMIT is essential otherwise multiple rows returned error 
+FROM employees; 
+
+-- Subquery thus could be used with each of the statements : FROM WHERE SELECT all of them 
+
+SELECT department FROM employees 
+WHERE department IN ('Clothing','Toys');
+-- = ANY and = ALL doesn't work 
+
+
+-- CASE statement to add an additional column : 
+
+SELECT salary, CASE WHEN salary < 100000 THEN 'UNDERPAID' WHEN salary > 150000 THEN 'OVERPAID' 
+ELSE 'UNPAID' END as judge_salary
+FROM employees; 
+-- cases not consumed by the clause are replaced by NULL, END keyword is quite important 
+-- for adding an additional column using CASE statement 
+ -- the alias for the column needs to be provided after the END clause. 
+ 
+ 
+ -- Transpose a dataset : 
+ 
+ SELECT SUM(CASE WHEN department='Sports' THEN 1 ELSE 0 END) as sports_employees
+ FROM employees; -- more and more such columns can be added 
+ 
+ SELECT department, COUNT(employee_id)
+ FROM employees 
+ GROUP BY department; 
+ 
+ -- Correlated Subqueries : 
+ 
+ -- Uncorrelated : 
+ 
+ SELECT first_name,salary 
+ FROM  employees 
+ WHERE salary > (SELECT AVG(salary) FROM employees);
+ -- employees earning better than the global average 
+ 
+ SELECT first_name,salary,department,
+ (SELECT AVG(salary) FROM employees as emp_in WHERE emp_in.department=emp_out.department)
+ FROM employees as emp_out
+ WHERE salary > (SELECT AVG(salary) FROM employees as emp_in WHERE emp_in.department=emp_out.department)
+ ORDER BY department; 
+ -- the average departmental salary is also displayed to check the correctness 
+ 
+SELECT e1.department,COUNT(employee_id)
+FROM employees as e1
+GROUP BY e1.department
+HAVING COUNT(employee_id)> 38
+ORDER BY COUNT(employee_id); 
+-- more than 38 employees without using a subquery 
+
+-- alternate 
+SELECT DISTINCT department
+FROM employees e1
+WHERE 38 < (SELECT COUNT(employee_id) FROM employees e2 WHERE e1.department=e2.department);
+-- either use DISTINCT or use GROUP BY
+
+
+SELECT DISTINCT e1.department,(SELECT MAX(e3.salary) FROM employees as e3 WHERE e1.department=e3.department) as max_sal
+FROM employees e1
+WHERE 38 < (SELECT COUNT(employee_id) FROM employees e2 WHERE e1.department=e2.department)
+ORDER BY max_sal;
+
+-- only those departments which have greater than 38 employees 
+ 
+-- Joins : 
+
+-- Below we implement each query using Joins as well as correlated subqueries : 
+SELECT * FROM regions; 
+
+SELECT employees.first_name, regions.country
+FROM employees,regions
+WHERE employees.region_id=regions.region_id;    -- We have joined two tables 
+
+SELECT employees.first_name,(SELECT regions.country FROM regions WHERE employees.region_id=regions.region_id)
+FROM employees; 
+-- Correlated subquery is also a kind of a Join, where we are joining on a common column 
+
+ 
+SELECT e.first_name,d.division
+FROM employees as e, departments as d
+WHERE e.department = d.department; 
+-- Notice that here we get only 943 employees instead of 1000 existing in the original table. 
+-- This is the distinction between inner join and outer join 
+
+-- using correlated subqueries : 
+
+SELECT e.first_name,(SELECT d.division FROM departments as d WHERE d.department=e.department)
+FROM employees as e; 
+-- This returns 1000 entries : Because this is a correlated subquery : for every record of the outer table 
+-- we have the subquery running. 
+
+-- multiple joins 
+SELECT e.first_name,d.division,r.country 
+FROM employees as e, departments as d, regions as r
+WHERE e.department = d.department AND e.region_id = r.region_id; 
+-- multiple joins again here 943 rows are returned and not 1000 rows 
+
+SELECT e.first_name,
+(SELECT d.division FROM departments as d WHERE d.department=e.department),
+(SELECT r.country FROM regions as r WHERE r.region_id=e.region_id)
+FROM employees as e; 
+-- using subqueries, here again 1000 rows are returned : some divisions are having NULL values 
+
+
+SELECT regions.country, count(employees.employee_id)  -- either aggregate column of group by column 
+FROM employees, regions
+WHERE employees.region_id = regions.region_id 
+GROUP BY regions.country; 
+-- grouped by country and then count the primary key 
+
+SELECT e1.first_name,e2.email
+FROM employees e1,employees e2
+WHERE e1.region_id = e2.region_id; 
+
+
+SELECT first_name,departments.department,country 
+FROM employees INNER JOIN departments 
+ON employees.department = departments.department
+INNER JOIN regions ON employees.region_id = regions.region_id; 
+-- this also returns 943 rows as the number of depaertments in the departments table is less (24 vs 27) 
+
+SELECT first_name,departments.department 
+FROM departments INNER JOIN employees 
+ON employees.department = departments.department;       -- order doesn't matter here 
+
+
+-- LEFT and  JOINs 
+SELECT DISTINCT e.department,d.department
+FROM employees as e INNER JOIN departments as d ON e.department = d.department; 
+-- 23 rows as some of the departments in the departments table DO NOT exist in the Employees table 
+
+SELECT DISTINCT e.department,d.department
+FROM employees as e LEFT JOIN departments as d ON e.department = d.department; 
+-- Table1 is preferred in here. If departments do not exist in the departments table then NULL appears 
+
+SELECT DISTINCT e.department,d.department
+FROM employees as e RIGHT JOIN departments as d ON e.department = d.department; 
+-- table 2 is given preference here.
+ 
+ 
+SELECT DISTINCT e.department,d.department
+FROM employees as e FULL OUTER JOIN departments as d ON e.department=d.department; 
+-- UNION of the 2 gives 28 rows in total 
+
+
+SELECT DISTINCT department FROM employees
+UNION 
+SELECT department FROM departments; 
+
+SELECT department FROM employees
+UNION
+SELECT department FROM departments;
+-- the two queries give the same result 
+
+SELECT department FROM employees
+UNION ALL
+SELECT department FROM departments;
+-- does not eliminate duplicates 
+
+
+(SELECT department FROM employees
+ORDER BY department)
+UNION 
+SELECT department FROM departments;
+
+
+SELECT department FROM departments
+EXCEPT 
+SELECT department FROM employees; 
+
+SELECT department FROM employees
+EXCEPT 
+SELECT department FROM departments; 
+
+
+SELECT * FROM employees CROSS JOIN departments;
+-- 24000 rows returned using CROSS JOIN here. 
+
+SELECT COUNT(DISTINCT (first_name||department)) FROM employees;
+-- this is first_name concatenated with the department and created as a new column 
+-- this has only 999 unique rows, which means that atleast one pair of first_name and department is repeated
+ 
+
+-- Count using correlated subquery : 
+
+SELECT first_name,department,(SELECT COUNT(*) FROM employees e2 WHERE e1.department=e2.department) as emp_count
+FROM employees e1 
+GROUP BY first_name,department -- combining 
+EXCEPT 
+SELECT first_name,department, COUNT(*) OVER(PARTITION BY department) 
+FROM employees;
+-- see above on why we get only 999 rows
+-- expensive correlated subquery 
+-- correlated subquery is slow compared to WINDOW function 
+
+SELECT first_name,employees.department,dept_count.emp_count
+FROM employees INNER JOIN 
+(SELECT department,COUNT(employee_id) as emp_count
+FROM employees 
+GROUP BY department) as dept_count ON employees.department = dept_count.department;
+-- here we are getting 1000 rows because we are not 
+
+SELECT department, COUNT(*) OVER(PARTITION BY department) FROM employees;
+
+SELECT department, COUNT(*) OVER() FROM employees;
+-- this gives us the total number of employees repeatedly 
+
+SELECT first_name,department,SUM(salary) OVER(PARTITION BY department)
+FROM employees;  -- any aggregate function can be used with the windowing function. 
+
+
+SELECT first_name,department,region_id, COUNT(*) OVER(PARTITION BY department) as dept_count,
+COUNT(*) OVER(PARTITION BY region_id) as region_count FROM employees; 
+
+
+-- Running total based upon hire date ordering 
+
+SELECT first_name, hire_date,salary,
+SUM(salary) OVER(ORDER BY hire_date RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+FROM employees;  
+
+
+

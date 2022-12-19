@@ -1,0 +1,53 @@
+SELECT first_name,hire_date,salary 
+FROM employees 
+ORDER BY hire_date; 
+
+-- Running total without the Window function here : 
+
+(SELECT first_name,hire_date, (SELECT SUM(salary) FROM employees e2 WHERE e2.hire_date<=e1.hire_date)
+FROM employees e1
+ORDER BY hire_date) -- inner query runs for every single record of the outer query so it's expensive 
+EXCEPT
+SELECT first_name,hire_date,SUM(salary) OVER(ORDER BY hire_date RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+FROM employees e1 
+ORDER BY hire_date; 
+-- Above was running total using the Window function here : Window functions are the key for computing the running 
+-- sum here 
+-- Now using JOINS : 
+
+SELECT e1.first_name,e2.hire_date, 
+FROM employees e1; 
+
+
+-- Assigning a rank based on salary : 
+
+SELECT first_name,department,salary,
+RANK() OVER(PARTITION BY department ORDER BY salary DESC)              -- one could also partition by the department here 
+FROM employees; 
+-- An extra Rank column is inserted based upon the salary ordered in a descending fashion 
+-- if we partition by department, then we get the data grouped by department 
+-- that is a departmental rank assignment 
+-- if we do not partition, then we get a global rank assignment. 
+
+SELECT * FROM (SELECT first_name,department,salary,
+RANK() OVER(PARTITION BY department ORDER BY salary DESC)              -- one could also partition by the department here 
+FROM employees) as tempo
+WHERE rank < 10; 
+-- this would give you top 9 employees of every department based upon salary 
+-- assigning departmental rank and global rank here 
+
+SELECT * FROM (SELECT first_name,department,salary,
+NTILE(5) OVER(PARTITION BY department ORDER BY salary DESC)              -- one could also partition by the department here 
+FROM employees) as tempo;
+-- buckets of rows using NTILE here
+
+
+SELECT first_name,salary,department,
+LEAD(salary) OVER(PARTITION BY department ORDER BY salary DESC)
+FROM employees; 
+-- here salary is also ordered. 
+
+
+
+
+
