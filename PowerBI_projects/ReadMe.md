@@ -1,4 +1,4 @@
-﻿**POWER BI key points:**
+**POWER BI key points:**
 
 - Options & Settings: Preview Features, Data Load, Regional Settings
 - Report, Data and Relationships Views
@@ -56,7 +56,7 @@ Data pre-processing: Trim leading and Trailing spaces from text based key fields
 
 Data Analysis and Pre-processing: 
 
-1) The Dataset:**  We have a relational dataset at hand to be connected on the basis of keys. This is a classic dataset based upon a fictitious company selling bicycle and allied products. We have 7 tables: calendar, category, customer, product, returns, sales, subcategory, territories. 
+1) **The Dataset:**  We have a relational dataset at hand to be connected on the basis of keys. This is a classic dataset based upon a fictitious company selling bicycle and allied products. We have 7 tables: calendar, category, customer, product, returns, sales, subcategory, territories. 
    1. Sales: This is a data (fact) table. Sales concerning a product. Relationships: (and associated foreign key)
       1. To Calendar Table: Order date 
       1. To Product Table: Product Key
@@ -92,7 +92,7 @@ Outcomes:
 
 Data Analysis and Pre-processing: 
 
-1) The Dataset:** We have 8 tables: loan, order, trans, card, disp, client, account, district. 
+1) **The Dataset:** We have 8 tables: loan, order, trans, card, disp, client, account, district. 
    1. loan: loan\_id is the primary key. Account number on which the loan is taken. Duration of the loan, it’s issue date, amount and monthly payment. **Status** of the loan: (A: finished repaid, B: finished defaulted, C: unfinished w.r.t the date limit we have but repaid later, D: unfinished defaulted).
    1. trans: trans. Id, account related to that transaction, balance, date of trans, type and mode of operation.
    1. disp: client\_id, account\_id and type of the account: whether the holder is an owner or a disponent.
