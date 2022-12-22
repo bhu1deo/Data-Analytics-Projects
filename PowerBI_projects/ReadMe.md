@@ -52,7 +52,7 @@ Prepare bookmarks accompanied with buttons to go to pages.
 
 Data pre-processing: Trim leading and Trailing spaces from text based key fields. 
 
-**Power BI Adventure Works Dataset Project Questions:**
+**Power BI Adventure Works Dataset Project:** The main aim of the project is to analyze the health of the company. A summary page should indicate the overall Revenue, Orders, Profit. It should also show the broad category-wise splits for the above metrics. Brief product-level information should be succintly detailed via appropriate visualizations. In the Product-level details page, individual product perfromance should be described. The metrics used for the description could be profit, returns, orders over time. Geographical, regionwise potential of the company should be shown on a map and conclusions should be drawn from it. Customer-level page should specify recurring customers, age-split of customers, most valuable customers and segmentation according to Age, Income, Occupation should be carried out.  
 
 Data Analysis and Pre-processing: 
 
